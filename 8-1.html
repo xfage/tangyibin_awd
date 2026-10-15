@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .main{
+            background-color: #f2f3f4;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .box{
+            width: 150px;
+            height: 150px;
+            border: 1px solid #ccc;
+            margin: 10px;
+            background-color: white;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.6s;
+            box-sizing: border-box;
+            /* width包括了padding和border */
+        }
+        .box:first-child:hover{
+            background-color: black;
+            color: white;
+            font-size: 100px;
+            border-width: 30px;
+        }
+        .box:nth-child(2):hover{
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.5);
+        }
+        .box:nth-child(3):hover{
+            text-shadow: 100px 0px 20px rgba(0,0,0,0.5);
+        }
+        .box:nth-of-type(4):hover{
+            border-radius: 50%;
+        }
+        .box:nth-of-type(5):hover{
+            background: linear-gradient(#000,#fff)
+        }
+        .box:nth-of-type(6):hover{
+            background: radial-gradient(#fff,#000)
+        }
+        .box:nth-of-type(6)+.box:hover{
+            transform: scale(0.5);
+        }
+        .box:nth-of-type(8):hover{
+            transform: translateX(-100px);
+        }
+        .box:nth-of-type(9):hover{
+            transform: rotateZ(-180deg);
+        }
+        .box:nth-of-type(10):hover{
+            transform: skewX(-45deg);
+        }
+        .box:nth-last-child(2):hover::before{
+            content: "#";
+            color:red;
+        }
+        .box:last-child:hover::after{
+            content: "唐翊斌";
+            color:white;
+            font-size: 8px;
+            display: block;
+            width:40px;
+            height: 40px;
+            margin: 10px;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            /* 黑底白字水平垂直居中，圆角 */
+            border-radius: 50%;
+            display: flex;
+        }
+        .box:nth-of-type(3n):hover{
+            border: 3px solid #f00;
+
+        }
+        /* 扩展：鼠标在偶数个盒子上时有变化 */
+        .box:nth-of-type(2n):hover{
+            border: 3px solid blue;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="box">1</div>
+        <div class="box">2</div>
+        <div class="box">3</div>
+        <div class="box">4</div>
+        <div class="box">5</div>
+        <div class="box">6</div>
+        <div class="box">7</div>
+        <div class="box">8</div>
+        <div class="box">9</div>
+        <div class="box">10</div>
+        <div class="box">11</div>
+        <div class="box">12</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Web 前端长度单位</title>
+<style>
+  .tang_body { font-family: "Microsoft YaHei", sans-serif; margin: 20px; }
+  .tang_box { border: 1px solid #333; margin: 10px 0; background: #e0f0ff; }
+  .tang_px   { width: 200px; }
+  .tang_em   { width: 12.5em; font-size: 16px; }
+  .tang_rem  { width: 12.5rem; }
+  .tang_pct  { width: 50%; }
+  .tang_vw   { width: 30vw; }
+  .tang_vh   { height: 10vh; }
+  .tang_vmin { width: 20vmin; }
+  .tang_vmax { width: 20vmax; }
+  .tang_ch   { width: 20ch; }
+  .tang_ex   { height: 10ex; }
+  .tang_cm   { width: 5cm; }
+  .tang_mm   { width: 50mm; }
+  .tang_in   { width: 2in; }
+  .tang_pt   { width: 144pt; }
+  .tang_pc   { width: 12pc; }
+  .tang_code { color: #c00; }
+  .tang_h1 { font-size: 28px; }
+  .tang_h2 { font-size: 22px; margin-top: 24px; }
+</style>
+</head>
+<body class="tang_body">
+<h1 class="tang_h1">Web 前端长度单位</h1>
+
+<h2 class="tang_h2">绝对单位</h2>
+<div class="tang_box tang_px">px — 200px（像素）</div>
+<div class="tang_box tang_cm">cm — 5cm（厘米）</div>
+<div class="tang_box tang_mm">mm — 50mm（毫米）</div>
+<div class="tang_box tang_in">in — 2in（英寸）</div>
+<div class="tang_box tang_pt">pt — 144pt（点，1in = 72pt）</div>
+<div class="tang_box tang_pc">pc — 12pc（派卡，1pc = 12pt）</div>
+
+<h2 class="tang_h2">相对单位</h2>
+<div class="tang_box tang_em">em — 12.5em（相对于父元素字体大小）</div>
+<div class="tang_box tang_rem">rem — 12.5rem（相对于根元素字体大小）</div>
+<div class="tang_box tang_pct">% — 50%（相对于父元素宽度）</div>
+<div class="tang_box tang_ch">ch — 20ch（相对于 "0" 字符宽度）</div>
+<div class="tang_box tang_ex">ex — 10ex（相对于字母 x 的高度）</div>
+
+<h2 class="tang_h2">视口单位</h2>
+<div class="tang_box tang_vw">vw — 30vw（视口宽度的 1%）</div>
+<div class="tang_box tang_vh">vh — 10vh（视口高度的 1%）</div>
+<div class="tang_box tang_vmin">vmin — 20vmin（视口较小边的 1%）</div>
+<div class="tang_box tang_vmax">vmax — 20vmax（视口较大边的 1%）</div>
+</body>
+</html>

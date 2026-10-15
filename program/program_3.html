@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24001010303 唐翊斌的左图右文</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      background: #f2f4f7;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tang_col-md-8 {
+      width: 748px;
+      max-width: 100%;
+    }
+
+    .tang_row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin: 0;
+    }
+
+    .tang_col-md-6 {
+      flex: 0 0 calc(50% - 12px);
+      max-width: calc(50% - 12px);
+    }
+
+    .tang_recent-activity-event {
+      position: relative;
+      background: #fff;
+      border: 1px solid #C4C4C4;
+      border-top: 4px solid #2A54BE;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      padding: 20px;
+      height: 100%;
+      transition: box-shadow 0.2s;
+    }
+
+    .tang_recent-activity-event:hover {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .tang_recent-activity-event .tang_row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 15px;
+      margin: 0;
+    }
+
+    .tang_recent-activity-event .tang_col-md-6:first-child {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tang_recent-activity-event .tang_col-md-6:last-child {
+      flex: 0 0 auto;
+      width: auto;
+      max-width: none;
+    }
+
+    .tang_event-date {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .tang_event-subject {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.5;
+      margin-top: 11px;
+    }
+
+    .tang_event-subject a {
+      color: #2A54BE;
+      text-decoration: none;
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: color 0.2s;
+    }
+
+    .tang_event-subject a:hover {
+      color: #999999;
+    }
+
+    .tang_event-image {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .tang_event-image img {
+      display: block;
+      width: 95px;
+      height: 128px;
+      object-fit: cover;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .tang_row {
+        gap: 16px;
+      }
+
+      .tang_col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
+
+      .tang_recent-activity-event {
+        padding: 16px;
+      }
+
+      .tang_event-subject a {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tang_col-md-8">
+    <div class="tang_row">
+
+      <div class="tang_col-md-6">
+        <div class="tang_recent-activity-event">
+          <div class="tang_row">
+            <div class="tang_col-md-6 tang_nopr">
+              <span class="tang_event-date">2026-10-06<br>少儿活动</span>
+              <h4 class="tang_event-subject">
+                <a href="https://www.clcn.net.cn/event/activity/detail?event_id=13261">指尖秋日，遇见国庆童话</a>
+              </h4>
+            </div>
+            <div class="tang_col-md-6">
+              <a class="tang_event-image" href="https://www.clcn.net.cn/event/activity/detail?event_id=13261">
+                <img src="https://bjreading.clcn.net.cn/cmss/upload/images/202609/VfIC6us4.jpg" alt="指尖秋日，遇见国庆童话">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tang_col-md-6">
+        <div class="tang_recent-activity-event">
+          <div class="tang_row">
+            <div class="tang_col-md-6 tang_nopr">
+              <span class="tang_event-date">2026-10-06<br>少儿活动</span>
+              <h4 class="tang_event-subject">
+                <a href="https://www.clcn.net.cn/event/activity/detail?event_id=13294">羊驼去野餐</a>
+              </h4>
+            </div>
+            <div class="tang_col-md-6">
+              <a class="tang_event-image" href="https://www.clcn.net.cn/event/activity/detail?event_id=13294">
+                <img src="https://bjreading.clcn.net.cn/cmss/upload/images/202609/vdFJfEXD.jpg" alt="羊驼去野餐">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tang_col-md-6">
+        <div class="tang_recent-activity-event">
+          <div class="tang_row">
+            <div class="tang_col-md-6 tang_nopr">
+              <span class="tang_event-date">2026-10-06<br>少儿影院</span>
+              <h4 class="tang_event-subject">
+                <a href="https://www.clcn.net.cn/event/activity/detail?event_id=13315">中国恐龙之勇敢小甲龙（4D影片）</a>
+              </h4>
+            </div>
+            <div class="tang_col-md-6">
+              <a class="tang_event-image" href="https://www.clcn.net.cn/event/activity/detail?event_id=13315">
+                <img src="https://bjreading.clcn.net.cn/cmss/upload/images/202506/g6nNJYau.jpg" alt="中国恐龙之勇敢小甲龙">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tang_col-md-6">
+        <div class="tang_recent-activity-event">
+          <div class="tang_row">
+            <div class="tang_col-md-6 tang_nopr">
+              <span class="tang_event-date">2026-10-06<br>少儿影院</span>
+              <h4 class="tang_event-subject">
+                <a href="https://www.clcn.net.cn/event/activity/detail?event_id=13316">鱼龙勇士2之深海捕鱼大赛（4D影片）</a>
+              </h4>
+            </div>
+            <div class="tang_col-md-6">
+              <a class="tang_event-image" href="https://www.clcn.net.cn/event/activity/detail?event_id=13316">
+                <img src="https://bjreading.clcn.net.cn/cmss/upload/images/202510/c94XL36w.jpg" alt="鱼龙勇士2之深海捕鱼大赛">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

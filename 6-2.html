@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>24001010303 唐翊斌 Flex布局演示</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        h2{
+            text-align: center;
+            margin:30px 0;
+            font-size:32px;
+        }
+        /* 外层容器，放4个大盒子 */
+        .wrap{
+            display: flex;
+            justify-content: space-around;
+            padding:0 30px;
+        }
+        /* 每个大盒子 */
+        .item{
+            width:18%;
+            aspect-ratio: 1/1;
+            border:1px solid black;
+            padding:20px;
+        }
+        /* 小方块通用样式 */
+        .box{
+            border:1px solid black;
+            background:#DDDDDD;
+        }
+        /* 案例1：1个方块，水平垂直居中 */
+        .case1{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+        .case1 .box{
+            width:35%;
+            aspect-ratio:1/1;
+        }
+        /* 案例2：两个方块垂直排列 */
+        .case2{
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            gap:17px;
+        }
+        .case2 .box{
+            width:47%;
+            height:30%;
+            margin:0 auto;
+        }
+        /* 案例3：2行2列4个方块 */
+        .case3{
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:space-around;
+            align-items:center;
+        }
+        .case3 .box{
+            width:45%;
+            height:35%;
+        }
+        /* 案例4：上1个，下面2个 */
+        .case4{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+        .case4 .top{
+            width:100%;
+            height:30%;
+            border:1px solid #333;
+            background:#DDDDDD;
+        }
+        .case4 .bottom{
+            display:flex;
+            gap:10px;
+            height:42%;
+            width:100%;
+        }
+        .case4 .bottom .box{
+            width:50%;
+            height:70%;
+        }
+    </style>
+</head>
+<body>
+    <h2>Flex 布局演示</h2>
+    <div class="wrap">
+        <!-- 案例1 -->
+        <div class="item case1">
+            <div class="box"></div>
+        </div>
+        <!-- 案例2 -->
+        <div class="item case2">
+            <div class="box"></div>
+            <div class="box"></div>
+        </div>
+        <!-- 案例3 -->
+        <div class="item case3">
+            <div class="box"></div>
+            <div class="box"></div>
+            <div class="box"></div>
+            <div class="box"></div>
+        </div>
+        <!-- 案例4 -->
+        <div class="item case4">
+            <div class="top"></div>
+            <div class="bottom">
+                <div class="box"></div>
+                <div class="box"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-3 媒体查询</title>
+    <style>
+        /* 重置默认样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 根元素字体大小，作为rem基准 */
+        html {
+            font-size: 16px;
+        }
+
+        /* 全屏盒子 */
+        .fullscreen-box {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #3498db;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .fullscreen-box h1 {
+            color: #ffffff;
+            font-size: 3rem;
+            font-family: "Microsoft YaHei", sans-serif;
+            text-shadow: 0.125rem 0.125rem 0.5rem rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.625rem;
+            transition: color 0.5s ease;
+        }
+
+        /* 媒体查询：视口宽度变化时背景颜色和文字颜色改变 */
+
+        /* 超大屏幕 >= 1200px */
+        @media (min-width: 1200px) {
+            html {
+                font-size: 16px;
+            }
+            .fullscreen-box {
+                background-color: #3498db; /* 蓝色背景 */
+            }
+            .fullscreen-box h1 {
+                color: #ffffff; /* 白色文字 */
+                font-size: 3rem;
+                letter-spacing: 0.625rem;
+            }
+            .fullscreen-box h1::after {
+                content: " — 超大屏幕";
+                font-size: 1.25rem;
+                letter-spacing: 0.125rem;
+                opacity: 0.7;
+                margin-left: 1.25rem;
+            }
+        }
+
+        /* 大屏幕 992px ~ 1199px */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            html {
+                font-size: 15px;
+            }
+            .fullscreen-box {
+                background-color: #2ecc71; /* 绿色背景 */
+            }
+            .fullscreen-box h1 {
+                color: #1a1a2e; /* 深蓝黑文字 */
+                font-size: 2.8rem;
+                letter-spacing: 0.5rem;
+            }
+            .fullscreen-box h1::after {
+                content: " — 大屏幕";
+                font-size: 1.2rem;
+                letter-spacing: 0.125rem;
+                opacity: 0.7;
+                margin-left: 1rem;
+            }
+        }
+
+        /* 中等屏幕 768px ~ 991px */
+        @media (min-width: 768px) and (max-width: 991px) {
+            html {
+                font-size: 14px;
+            }
+            .fullscreen-box {
+                background-color: #f39c12; /* 橙色背景 */
+            }
+            .fullscreen-box h1 {
+                color: #2c3e50; /* 深灰蓝文字 */
+                font-size: 2.5rem;
+                letter-spacing: 0.4rem;
+            }
+            .fullscreen-box h1::after {
+                content: " — 中等屏幕";
+                font-size: 1.1rem;
+                letter-spacing: 0.125rem;
+                opacity: 0.7;
+                margin-left: 0.9375rem;
+            }
+        }
+
+        /* 小屏幕 576px ~ 767px */
+        @media (min-width: 576px) and (max-width: 767px) {
+            html {
+                font-size: 13px;
+            }
+            .fullscreen-box {
+                background-color: #e74c3c; /* 红色背景 */
+            }
+            .fullscreen-box h1 {
+                color: #ffeaa7; /* 浅黄文字 */
+                font-size: 2.2rem;
+                letter-spacing: 0.3rem;
+            }
+            .fullscreen-box h1::after {
+                content: " — 小屏幕";
+                font-size: 1rem;
+                letter-spacing: 0.125rem;
+                opacity: 0.7;
+                margin-left: 0.625rem;
+            }
+        }
+
+        /* 超小屏幕 < 576px */
+        @media (max-width: 575px) {
+            html {
+                font-size: 12px;
+            }
+            .fullscreen-box {
+                background-color: #9b59b6; /* 紫色背景 */
+            }
+            .fullscreen-box h1 {
+                color: #fdcb6e; /* 金黄文字 */
+                font-size: 1.8rem;
+                letter-spacing: 0.3125rem;
+            }
+            .fullscreen-box h1::after {
+                content: " — 超小屏幕";
+                font-size: 0.875rem;
+                letter-spacing: 0.125rem;
+                opacity: 0.7;
+                margin-left: 0.5rem;
+            }
+        }
+
+        /* 横屏提示 */
+        @media (orientation: landscape) and (max-width: 767px) {
+            .fullscreen-box h1::before {
+                content: "横屏模式 🔽 ";
+                display: block;
+                font-size: 0.875rem;
+                margin-bottom: 0.625rem;
+                opacity: 0.6;
+            }
+        }
+
+        /* 竖屏提示 */
+        @media (orientation: portrait) {
+            .fullscreen-box h1::before {
+                content: "竖屏模式 📱 ";
+                display: block;
+                font-size: 0.875rem;
+                margin-bottom: 0.625rem;
+                opacity: 0.6;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="fullscreen-box">
+        <h1>唐翊斌</h1>
+    </div>
+</body>
+</html>
