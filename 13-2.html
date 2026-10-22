@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucide SVG 图标</title>
+    <script src="cdn/lucide/lucide.min.js"></script>
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f7f4ee;
+            --card: #fffdf8;
+            --line: #ded8cc;
+            --orange: #e66a3d;
+            --blue: #215a70;
+            --shadow: 0 18px 45px rgba(28, 39, 43, .09);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.6;
+        }
+
+        body::before {
+            position: fixed;
+            z-index: -1;
+            inset: 0;
+            content: "";
+            opacity: .42;
+            background-image: linear-gradient(rgba(33, 90, 112, .045) 1px, transparent 1px), linear-gradient(90deg, rgba(33, 90, 112, .045) 1px, transparent 1px);
+            background-size: 34px 34px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .tang_page-shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+        .tang_header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 28px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .tang_brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+        .tang_brand-mark {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            color: #fff;
+            background: var(--orange);
+            font-family: Georgia, serif;
+            font-size: 20px;
+            transform: rotate(-6deg);
+        }
+        .tang_student-id { color: var(--muted); font-size: 13px; letter-spacing: 1px; }
+
+        .tang_hero { padding: 60px 0 40px; }
+
+        .tang_eyebrow { margin-bottom: 18px; color: var(--orange); font-size: 13px; font-weight: 700; letter-spacing: 3px; }
+        .tang_hero h1 { font-family: Georgia, "Songti SC", serif; font-size: clamp(36px, 5vw, 56px); font-weight: 400; line-height: 1.1; }
+        .tang_hero h1 span { color: var(--blue); }
+        .tang_hero p { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 600px; }
+
+        .tang_section { padding: 40px 0; }
+
+        .tang_section-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .tang_section-title h2 { font-family: Georgia, "Songti SC", serif; font-size: 28px; font-weight: 400; }
+        .tang_section-title p { color: var(--muted); font-size: 13px; }
+
+        .tang_icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 14px;
+        }
+
+        .tang_icon-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px;
+            border: 1px solid var(--line);
+            background: var(--card);
+            box-shadow: var(--shadow);
+            transition: transform .25s ease, border-color .25s ease;
+        }
+        .tang_icon-card:hover { border-color: var(--orange); transform: translateY(-4px); }
+        .tang_icon-card i, .tang_icon-card svg {
+            width: 28px;
+            height: 28px;
+            color: var(--blue);
+            margin-bottom: 10px;
+        }
+        .tang_icon-card span { color: var(--muted); font-size: 11px; text-align: center; word-break: break-all; }
+
+        .tang_footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 24px 0 34px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        @media (max-width: 760px) {
+            .tang_page-shell { width: min(100% - 28px, 560px); }
+            .tang_header { padding: 20px 0; }
+            .tang_student-id { display: none; }
+            .tang_hero { padding: 40px 0 30px; }
+            .tang_icon-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+            .tang_footer { display: block; }
+            .tang_footer span { display: block; margin-top: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_page-shell">
+        <header class="tang_header">
+            <a class="tang_brand" href="index.html" aria-label="返回首页"><span class="tang_brand-mark">唐</span><span>课堂实践档案</span></a>
+            <span class="tang_student-id">24001010303 · 计算机24003班</span>
+        </header>
+
+        <main>
+            <section class="tang_hero">
+                <p class="tang_eyebrow">LUCIDE / SVG 图标</p>
+                <h1>Lucide<br><span>SVG 图标</span></h1>
+                <p>使用 SVG 方式显示图标，通过 JavaScript 动态生成，支持自定义大小、颜色和样式。</p>
+            </section>
+
+            <section class="tang_section">
+                <div class="tang_section-title">
+                    <h2>界面图标</h2>
+                    <p>Lucide · SVG 图标</p>
+                </div>
+                <div class="tang_icon-grid">
+                    <div class="tang_icon-card"><i data-lucide="home"></i><span>home</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user"></i><span>user</span></div>
+                    <div class="tang_icon-card"><i data-lucide="settings"></i><span>settings</span></div>
+                    <div class="tang_icon-card"><i data-lucide="search"></i><span>search</span></div>
+                    <div class="tang_icon-card"><i data-lucide="bell"></i><span>bell</span></div>
+                    <div class="tang_icon-card"><i data-lucide="mail"></i><span>mail</span></div>
+                    <div class="tang_icon-card"><i data-lucide="phone"></i><span>phone</span></div>
+                    <div class="tang_icon-card"><i data-lucide="camera"></i><span>camera</span></div>
+                    <div class="tang_icon-card"><i data-lucide="image"></i><span>image</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file"></i><span>file</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder"></i><span>folder</span></div>
+                    <div class="tang_icon-card"><i data-lucide="calendar"></i><span>calendar</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clock"></i><span>clock</span></div>
+                    <div class="tang_icon-card"><i data-lucide="map-pin"></i><span>map-pin</span></div>
+                    <div class="tang_icon-card"><i data-lucide="globe"></i><span>globe</span></div>
+                    <div class="tang_icon-card"><i data-lucide="lock"></i><span>lock</span></div>
+                    <div class="tang_icon-card"><i data-lucide="unlock"></i><span>unlock</span></div>
+                    <div class="tang_icon-card"><i data-lucide="eye"></i><span>eye</span></div>
+                    <div class="tang_icon-card"><i data-lucide="eye-off"></i><span>eye-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="edit"></i><span>edit</span></div>
+                    <div class="tang_icon-card"><i data-lucide="trash-2"></i><span>trash-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="download"></i><span>download</span></div>
+                    <div class="tang_icon-card"><i data-lucide="upload"></i><span>upload</span></div>
+                    <div class="tang_icon-card"><i data-lucide="share-2"></i><span>share-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="link"></i><span>link</span></div>
+                    <div class="tang_icon-card"><i data-lucide="bookmark"></i><span>bookmark</span></div>
+                    <div class="tang_icon-card"><i data-lucide="flag"></i><span>flag</span></div>
+                    <div class="tang_icon-card"><i data-lucide="tag"></i><span>tag</span></div>
+                    <div class="tang_icon-card"><i data-lucide="message-circle"></i><span>message-circle</span></div>
+                    <div class="tang_icon-card"><i data-lucide="send"></i><span>send</span></div>
+                    <div class="tang_icon-card"><i data-lucide="paperclip"></i><span>paperclip</span></div>
+                    <div class="tang_icon-card"><i data-lucide="smile"></i><span>smile</span></div>
+                    <div class="tang_icon-card"><i data-lucide="thumbs-up"></i><span>thumbs-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="award"></i><span>award</span></div>
+                    <div class="tang_icon-card"><i data-lucide="gift"></i><span>gift</span></div>
+                    <div class="tang_icon-card"><i data-lucide="shopping-cart"></i><span>shopping-cart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="credit-card"></i><span>credit-card</span></div>
+                    <div class="tang_icon-card"><i data-lucide="truck"></i><span>truck</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package"></i><span>package</span></div>
+                    <div class="tang_icon-card"><i data-lucide="bar-chart"></i><span>bar-chart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="pie-chart"></i><span>pie-chart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="trending-up"></i><span>trending-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="activity"></i><span>activity</span></div>
+                    <div class="tang_icon-card"><i data-lucide="zap"></i><span>zap</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sun"></i><span>sun</span></div>
+                    <div class="tang_icon-card"><i data-lucide="moon"></i><span>moon</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud"></i><span>cloud</span></div>
+                    <div class="tang_icon-card"><i data-lucide="umbrella"></i><span>umbrella</span></div>
+                    <div class="tang_icon-card"><i data-lucide="wind"></i><span>wind</span></div>
+                    <div class="tang_icon-card"><i data-lucide="droplet"></i><span>droplet</span></div>
+                    <div class="tang_icon-card"><i data-lucide="flame"></i><span>flame</span></div>
+                    <div class="tang_icon-card"><i data-lucide="snowflake"></i><span>snowflake</span></div>
+                    <div class="tang_icon-card"><i data-lucide="leaf"></i><span>leaf</span></div>
+                    <div class="tang_icon-card"><i data-lucide="flower"></i><span>flower</span></div>
+                    <div class="tang_icon-card"><i data-lucide="mountain"></i><span>mountain</span></div>
+                    <div class="tang_icon-card"><i data-lucide="anchor"></i><span>anchor</span></div>
+                    <div class="tang_icon-card"><i data-lucide="compass"></i><span>compass</span></div>
+                    <div class="tang_icon-card"><i data-lucide="map"></i><span>map</span></div>
+                    <div class="tang_icon-card"><i data-lucide="car"></i><span>car</span></div>
+                    <div class="tang_icon-card"><i data-lucide="plane"></i><span>plane</span></div>
+                    <div class="tang_icon-card"><i data-lucide="train"></i><span>train</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rocket"></i><span>rocket</span></div>
+                    <div class="tang_icon-card"><i data-lucide="gamepad"></i><span>gamepad</span></div>
+                    <div class="tang_icon-card"><i data-lucide="music"></i><span>music</span></div>
+                    <div class="tang_icon-card"><i data-lucide="headphones"></i><span>headphones</span></div>
+                    <div class="tang_icon-card"><i data-lucide="mic"></i><span>mic</span></div>
+                    <div class="tang_icon-card"><i data-lucide="video"></i><span>video</span></div>
+                    <div class="tang_icon-card"><i data-lucide="wifi"></i><span>wifi</span></div>
+                    <div class="tang_icon-card"><i data-lucide="battery"></i><span>battery</span></div>
+                    <div class="tang_icon-card"><i data-lucide="power"></i><span>power</span></div>
+                    <div class="tang_icon-card"><i data-lucide="lightbulb"></i><span>lightbulb</span></div>
+                    <div class="tang_icon-card"><i data-lucide="tv"></i><span>tv</span></div>
+                    <div class="tang_icon-card"><i data-lucide="smartphone"></i><span>smartphone</span></div>
+                    <div class="tang_icon-card"><i data-lucide="laptop"></i><span>laptop</span></div>
+                    <div class="tang_icon-card"><i data-lucide="printer"></i><span>printer</span></div>
+                    <div class="tang_icon-card"><i data-lucide="keyboard"></i><span>keyboard</span></div>
+                    <div class="tang_icon-card"><i data-lucide="database"></i><span>database</span></div>
+                    <div class="tang_icon-card"><i data-lucide="code"></i><span>code</span></div>
+                    <div class="tang_icon-card"><i data-lucide="terminal"></i><span>terminal</span></div>
+                    <div class="tang_icon-card"><i data-lucide="bug"></i><span>bug</span></div>
+                    <div class="tang_icon-card"><i data-lucide="shield"></i><span>shield</span></div>
+                    <div class="tang_icon-card"><i data-lucide="key"></i><span>key</span></div>
+                    <div class="tang_icon-card"><i data-lucide="filter"></i><span>filter</span></div>
+                    <div class="tang_icon-card"><i data-lucide="wrench"></i><span>wrench</span></div>
+                    <div class="tang_icon-card"><i data-lucide="check"></i><span>check</span></div>
+                    <div class="tang_icon-card"><i data-lucide="x"></i><span>x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="plus"></i><span>plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="minus"></i><span>minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-up"></i><span>chevron-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-down"></i><span>chevron-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-up"></i><span>arrow-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-down"></i><span>arrow-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-right"></i><span>arrow-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-left"></i><span>arrow-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rotate-cw"></i><span>rotate-cw</span></div>
+                    <div class="tang_icon-card"><i data-lucide="play"></i><span>play</span></div>
+                    <div class="tang_icon-card"><i data-lucide="pause"></i><span>pause</span></div>
+                    <div class="tang_icon-card"><i data-lucide="square"></i><span>square</span></div>
+                    <div class="tang_icon-card"><i data-lucide="book"></i><span>book</span></div>
+                    <div class="tang_icon-card"><i data-lucide="newspaper"></i><span>newspaper</span></div>
+                    <div class="tang_icon-card"><i data-lucide="graduation-cap"></i><span>graduation-cap</span></div>
+                    <div class="tang_icon-card"><i data-lucide="pen-tool"></i><span>pen-tool</span></div>
+                    <div class="tang_icon-card"><i data-lucide="calculator"></i><span>calculator</span></div>
+                    <div class="tang_icon-card"><i data-lucide="briefcase"></i><span>briefcase</span></div>
+                    <div class="tang_icon-card"><i data-lucide="building"></i><span>building</span></div>
+                    <div class="tang_icon-card"><i data-lucide="store"></i><span>store</span></div>
+                    <div class="tang_icon-card"><i data-lucide="dog"></i><span>dog</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cat"></i><span>cat</span></div>
+                    <div class="tang_icon-card"><i data-lucide="fish"></i><span>fish</span></div>
+                    <div class="tang_icon-card"><i data-lucide="egg"></i><span>egg</span></div>
+                    <div class="tang_icon-card"><i data-lucide="apple"></i><span>apple</span></div>
+                    <div class="tang_icon-card"><i data-lucide="carrot"></i><span>carrot</span></div>
+                    <div class="tang_icon-card"><i data-lucide="pizza"></i><span>pizza</span></div>
+                    <div class="tang_icon-card"><i data-lucide="coffee"></i><span>coffee</span></div>
+                    <div class="tang_icon-card"><i data-lucide="wine"></i><span>wine</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cake"></i><span>cake</span></div>
+                    <div class="tang_icon-card"><i data-lucide="tree-deciduous"></i><span>tree-deciduous</span></div>
+                    <div class="tang_icon-card"><i data-lucide="palette"></i><span>palette</span></div>
+                    <div class="tang_icon-card"><i data-lucide="brush"></i><span>brush</span></div>
+                    <div class="tang_icon-card"><i data-lucide="scissors"></i><span>scissors</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard"></i><span>clipboard</span></div>
+                    <div class="tang_icon-card"><i data-lucide="copy"></i><span>copy</span></div>
+                    <div class="tang_icon-card"><i data-lucide="save"></i><span>save</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-open"></i><span>folder-open</span></div>
+                </div>
+            </section>
+
+            <section class="tang_section">
+                <div class="tang_section-title">
+                    <h2>箭头与导航</h2>
+                    <p>Lucide · SVG 图标</p>
+                </div>
+                <div class="tang_icon-grid">
+                    <div class="tang_icon-card"><i data-lucide="arrow-up"></i><span>arrow-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-down"></i><span>arrow-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-left"></i><span>arrow-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-right"></i><span>arrow-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-up-right"></i><span>arrow-up-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-up-left"></i><span>arrow-up-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-down-right"></i><span>arrow-down-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="arrow-down-left"></i><span>arrow-down-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-up"></i><span>chevron-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-down"></i><span>chevron-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-left"></i><span>chevron-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevron-right"></i><span>chevron-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevrons-up"></i><span>chevrons-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevrons-down"></i><span>chevrons-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevrons-left"></i><span>chevrons-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="chevrons-right"></i><span>chevrons-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="corner-up-left"></i><span>corner-up-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="corner-up-right"></i><span>corner-up-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="corner-down-left"></i><span>corner-down-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="corner-down-right"></i><span>corner-down-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="external-link"></i><span>external-link</span></div>
+                    <div class="tang_icon-card"><i data-lucide="link"></i><span>link</span></div>
+                    <div class="tang_icon-card"><i data-lucide="unlink"></i><span>unlink</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rotate-cw"></i><span>rotate-cw</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rotate-ccw"></i><span>rotate-ccw</span></div>
+                    <div class="tang_icon-card"><i data-lucide="refresh-cw"></i><span>refresh-cw</span></div>
+                    <div class="tang_icon-card"><i data-lucide="refresh-ccw"></i><span>refresh-ccw</span></div>
+                    <div class="tang_icon-card"><i data-lucide="repeat"></i><span>repeat</span></div>
+                    <div class="tang_icon-card"><i data-lucide="shuffle"></i><span>shuffle</span></div>
+                    <div class="tang_icon-card"><i data-lucide="move"></i><span>move</span></div>
+                    <div class="tang_icon-card"><i data-lucide="maximize"></i><span>maximize</span></div>
+                    <div class="tang_icon-card"><i data-lucide="minimize"></i><span>minimize</span></div>
+                    <div class="tang_icon-card"><i data-lucide="maximize-2"></i><span>maximize-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="minimize-2"></i><span>minimize-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="move-horizontal"></i><span>move-horizontal</span></div>
+                    <div class="tang_icon-card"><i data-lucide="move-vertical"></i><span>move-vertical</span></div>
+                    <div class="tang_icon-card"><i data-lucide="move-diagonal"></i><span>move-diagonal</span></div>
+                    <div class="tang_icon-card"><i data-lucide="move-diagonal-2"></i><span>move-diagonal-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="navigation"></i><span>navigation</span></div>
+                    <div class="tang_icon-card"><i data-lucide="navigation-2"></i><span>navigation-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="compass"></i><span>compass</span></div>
+                    <div class="tang_icon-card"><i data-lucide="map"></i><span>map</span></div>
+                    <div class="tang_icon-card"><i data-lucide="map-pin"></i><span>map-pin</span></div>
+                    <div class="tang_icon-card"><i data-lucide="locate"></i><span>locate</span></div>
+                    <div class="tang_icon-card"><i data-lucide="locate-fixed"></i><span>locate-fixed</span></div>
+                    <div class="tang_icon-card"><i data-lucide="crosshair"></i><span>crosshair</span></div>
+                    <div class="tang_icon-card"><i data-lucide="target"></i><span>target</span></div>
+                    <div class="tang_icon-card"><i data-lucide="focus"></i><span>focus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="locate-off"></i><span>locate-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="send"></i><span>send</span></div>
+                    <div class="tang_icon-card"><i data-lucide="paper-plane"></i><span>paper-plane</span></div>
+                    <div class="tang_icon-card"><i data-lucide="share"></i><span>share</span></div>
+                    <div class="tang_icon-card"><i data-lucide="share-2"></i><span>share-2</span></div>
+                </div>
+            </section>
+
+            <section class="tang_section">
+                <div class="tang_section-title">
+                    <h2>媒体与文件</h2>
+                    <p>Lucide · SVG 图标</p>
+                </div>
+                <div class="tang_icon-grid">
+                    <div class="tang_icon-card"><i data-lucide="play"></i><span>play</span></div>
+                    <div class="tang_icon-card"><i data-lucide="pause"></i><span>pause</span></div>
+                    <div class="tang_icon-card"><i data-lucide="square"></i><span>square</span></div>
+                    <div class="tang_icon-card"><i data-lucide="stop-circle"></i><span>stop-circle</span></div>
+                    <div class="tang_icon-card"><i data-lucide="skip-back"></i><span>skip-back</span></div>
+                    <div class="tang_icon-card"><i data-lucide="skip-forward"></i><span>skip-forward</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rewind"></i><span>rewind</span></div>
+                    <div class="tang_icon-card"><i data-lucide="fast-forward"></i><span>fast-forward</span></div>
+                    <div class="tang_icon-card"><i data-lucide="volume"></i><span>volume</span></div>
+                    <div class="tang_icon-card"><i data-lucide="volume-1"></i><span>volume-1</span></div>
+                    <div class="tang_icon-card"><i data-lucide="volume-2"></i><span>volume-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="volume-x"></i><span>volume-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="music"></i><span>music</span></div>
+                    <div class="tang_icon-card"><i data-lucide="music-2"></i><span>music-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="music-3"></i><span>music-3</span></div>
+                    <div class="tang_icon-card"><i data-lucide="music-4"></i><span>music-4</span></div>
+                    <div class="tang_icon-card"><i data-lucide="video"></i><span>video</span></div>
+                    <div class="tang_icon-card"><i data-lucide="video-off"></i><span>video-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="camera"></i><span>camera</span></div>
+                    <div class="tang_icon-card"><i data-lucide="camera-off"></i><span>camera-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="image"></i><span>image</span></div>
+                    <div class="tang_icon-card"><i data-lucide="image-plus"></i><span>image-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="image-minus"></i><span>image-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="image-off"></i><span>image-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="film"></i><span>film</span></div>
+                    <div class="tang_icon-card"><i data-lucide="mic"></i><span>mic</span></div>
+                    <div class="tang_icon-card"><i data-lucide="mic-off"></i><span>mic-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="headphones"></i><span>headphones</span></div>
+                    <div class="tang_icon-card"><i data-lucide="speaker"></i><span>speaker</span></div>
+                    <div class="tang_icon-card"><i data-lucide="radio"></i><span>radio</span></div>
+                    <div class="tang_icon-card"><i data-lucide="podcast"></i><span>podcast</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file"></i><span>file</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-text"></i><span>file-text</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-image"></i><span>file-image</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-video"></i><span>file-video</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-audio"></i><span>file-audio</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-archive"></i><span>file-archive</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-code"></i><span>file-code</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-json"></i><span>file-json</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-spreadsheet"></i><span>file-spreadsheet</span></div>
+                    <div class="tang_icon-card"><i data-lucide="file-type"></i><span>file-type</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder"></i><span>folder</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-open"></i><span>folder-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-plus"></i><span>folder-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-minus"></i><span>folder-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-x"></i><span>folder-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-check"></i><span>folder-check</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-clock"></i><span>folder-clock</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-cog"></i><span>folder-cog</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-down"></i><span>folder-down</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-heart"></i><span>folder-heart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-key"></i><span>folder-key</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-lock"></i><span>folder-lock</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-minus"></i><span>folder-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-open"></i><span>folder-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-output"></i><span>folder-output</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-pen"></i><span>folder-pen</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-plus"></i><span>folder-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-search"></i><span>folder-search</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-symlink"></i><span>folder-symlink</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-tree"></i><span>folder-tree</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-up"></i><span>folder-up</span></div>
+                    <div class="tang_icon-card"><i data-lucide="folder-x"></i><span>folder-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="archive"></i><span>archive</span></div>
+                    <div class="tang_icon-card"><i data-lucide="box"></i><span>box</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package"></i><span>package</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package-check"></i><span>package-check</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package-minus"></i><span>package-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package-plus"></i><span>package-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package-search"></i><span>package-search</span></div>
+                    <div class="tang_icon-card"><i data-lucide="package-x"></i><span>package-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard"></i><span>clipboard</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-check"></i><span>clipboard-check</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-copy"></i><span>clipboard-copy</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-edit"></i><span>clipboard-edit</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-list"></i><span>clipboard-list</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-paste"></i><span>clipboard-paste</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-signature"></i><span>clipboard-signature</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-type"></i><span>clipboard-type</span></div>
+                    <div class="tang_icon-card"><i data-lucide="clipboard-x"></i><span>clipboard-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="save"></i><span>save</span></div>
+                    <div class="tang_icon-card"><i data-lucide="download"></i><span>download</span></div>
+                    <div class="tang_icon-card"><i data-lucide="upload"></i><span>upload</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud"></i><span>cloud</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-download"></i><span>cloud-download</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-upload"></i><span>cloud-upload</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-off"></i><span>cloud-off</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-rain"></i><span>cloud-rain</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-snow"></i><span>cloud-snow</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-lightning"></i><span>cloud-lightning</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-drizzle"></i><span>cloud-drizzle</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-hail"></i><span>cloud-hail</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-fog"></i><span>cloud-fog</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-sun"></i><span>cloud-sun</span></div>
+                    <div class="tang_icon-card"><i data-lucide="cloud-moon"></i><span>cloud-moon</span></div>
+                </div>
+            </section>
+
+            <section class="tang_section">
+                <div class="tang_section-title">
+                    <h2>界面元素</h2>
+                    <p>Lucide · SVG 图标</p>
+                </div>
+                <div class="tang_icon-grid">
+                    <div class="tang_icon-card"><i data-lucide="home"></i><span>home</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user"></i><span>user</span></div>
+                    <div class="tang_icon-card"><i data-lucide="users"></i><span>users</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-plus"></i><span>user-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-minus"></i><span>user-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-check"></i><span>user-check</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-x"></i><span>user-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-circle"></i><span>user-circle</span></div>
+                    <div class="tang_icon-card"><i data-lucide="user-square"></i><span>user-square</span></div>
+                    <div class="tang_icon-card"><i data-lucide="users-round"></i><span>users-round</span></div>
+                    <div class="tang_icon-card"><i data-lucide="settings"></i><span>settings</span></div>
+                    <div class="tang_icon-card"><i data-lucide="settings-2"></i><span>settings-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sliders"></i><span>sliders</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sliders-horizontal"></i><span>sliders-horizontal</span></div>
+                    <div class="tang_icon-card"><i data-lucide="menu"></i><span>menu</span></div>
+                    <div class="tang_icon-card"><i data-lucide="more-horizontal"></i><span>more-horizontal</span></div>
+                    <div class="tang_icon-card"><i data-lucide="more-vertical"></i><span>more-vertical</span></div>
+                    <div class="tang_icon-card"><i data-lucide="grid"></i><span>grid</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-grid"></i><span>layout-grid</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-list"></i><span>layout-list</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-dashboard"></i><span>layout-dashboard</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sidebar"></i><span>sidebar</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sidebar-close"></i><span>sidebar-close</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sidebar-open"></i><span>sidebar-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-left"></i><span>panel-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-right"></i><span>panel-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-top"></i><span>panel-top</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-bottom"></i><span>panel-bottom</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-left-close"></i><span>panel-left-close</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-left-open"></i><span>panel-left-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-right-close"></i><span>panel-right-close</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-right-open"></i><span>panel-right-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-top-close"></i><span>panel-top-close</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-top-open"></i><span>panel-top-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-bottom-close"></i><span>panel-bottom-close</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-bottom-open"></i><span>panel-bottom-open</span></div>
+                    <div class="tang_icon-card"><i data-lucide="toolbar"></i><span>toolbar</span></div>
+                    <div class="tang_icon-card"><i data-lucide="sidebar"></i><span>sidebar</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-left"></i><span>panel-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-right"></i><span>panel-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-top"></i><span>panel-top</span></div>
+                    <div class="tang_icon-card"><i data-lucide="panel-bottom"></i><span>panel-bottom</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout"></i><span>layout</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-template"></i><span>layout-template</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-dashboard"></i><span>layout-dashboard</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-grid"></i><span>layout-grid</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-list"></i><span>layout-list</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-panel-left"></i><span>layout-panel-left</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-panel-right"></i><span>layout-panel-right</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-panel-top"></i><span>layout-panel-top</span></div>
+                    <div class="tang_icon-card"><i data-lucide="layout-panel-bottom"></i><span>layout-panel-bottom</span></div>
+                    <div class="tang_icon-card"><i data-lucide="columns"></i><span>columns</span></div>
+                    <div class="tang_icon-card"><i data-lucide="columns-2"></i><span>columns-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="columns-3"></i><span>columns-3</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rows"></i><span>rows</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rows-2"></i><span>rows-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="rows-3"></i><span>rows-3</span></div>
+                    <div class="tang_icon-card"><i data-lucide="table"></i><span>table</span></div>
+                    <div class="tang_icon-card"><i data-lucide="table-2"></i><span>table-2</span></div>
+                    <div class="tang_icon-card"><i data-lucide="table-properties"></i><span>table-properties</span></div>
+                    <div class="tang_icon-card"><i data-lucide="table-of-contents"></i><span>table-of-contents</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list"></i><span>list</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-checks"></i><span>list-checks</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-ordered"></i><span>list-ordered</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-plus"></i><span>list-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-minus"></i><span>list-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-x"></i><span>list-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-filter"></i><span>list-filter</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-tree"></i><span>list-tree</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-video"></i><span>list-video</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-music"></i><span>list-music</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-collapse"></i><span>list-collapse</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-start"></i><span>list-start</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-end"></i><span>list-end</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-restart"></i><span>list-restart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-todo"></i><span>list-todo</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-checks"></i><span>list-checks</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-ordered"></i><span>list-ordered</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-plus"></i><span>list-plus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-minus"></i><span>list-minus</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-x"></i><span>list-x</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-filter"></i><span>list-filter</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-tree"></i><span>list-tree</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-video"></i><span>list-video</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-music"></i><span>list-music</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-collapse"></i><span>list-collapse</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-start"></i><span>list-start</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-end"></i><span>list-end</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-restart"></i><span>list-restart</span></div>
+                    <div class="tang_icon-card"><i data-lucide="list-todo"></i><span>list-todo</span></div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="tang_footer">
+            <span>唐翊斌 · 高级网页设计课堂实践</span>
+            <span>Built with HTML &amp; CSS · No CDN</span>
+        </footer>
+    </div>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
