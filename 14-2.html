@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-2 JavaScript六种基本数据类型</title>
+    <!-- 姓名：唐翊斌，日期：2026-10-22，功能名称：演示JavaScript基本的六种数据类型 -->
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .tang_container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c5aa0;
+        }
+        .tang_intro {
+            background-color: #fff;
+            border-left: 5px solid #2c5aa0;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        .tang_cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .tang_card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            padding: 16px 20px;
+            flex: 1 1 260px;
+            border-top: 4px solid #2c5aa0;
+        }
+        .tang_card h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #2c5aa0;
+        }
+        .tang_card p {
+            margin: 6px 0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        .tang_code {
+            font-family: Consolas, monospace;
+            background-color: #eef2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c7254e;
+        }
+        .tang_result {
+            font-family: Consolas, monospace;
+            font-weight: bold;
+            color: #1a7f37;
+        }
+        .tang_back {
+            display: inline-block;
+            margin-top: 24px;
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+        .tang_back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_container">
+        <h1>JavaScript 基本的六种数据类型</h1>
+        <div class="tang_intro">
+            <p>使用 <span class="tang_code">typeof</span> 运算符可以检测变量的数据类型。下面六张卡片分别演示了 JavaScript 的六种基本数据类型，卡片中的 <span class="tang_result">绿色结果</span> 由页面中的脚本实时计算得出。</p>
+        </div>
+        <div class="tang_cards">
+            <div class="tang_card">
+                <h2>1. String（字符串）</h2>
+                <p>示例：<span class="tang_code">var tang_str = "唐翊斌";</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_str"></span></p>
+                <p>用引号（单引号或双引号）括起来的一串字符。</p>
+            </div>
+            <div class="tang_card">
+                <h2>2. Number（数值型）</h2>
+                <p>示例：<span class="tang_code">var tang_num = 3.14;</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_num"></span></p>
+                <p>整数和浮点数，不区分整型与浮点型。</p>
+            </div>
+            <div class="tang_card">
+                <h2>3. Boolean（布尔型）</h2>
+                <p>示例：<span class="tang_code">var tang_bool = true;</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_bool"></span></p>
+                <p>只有两个值：true（真）和 false（假）。</p>
+            </div>
+            <div class="tang_card">
+                <h2>4. Undefined（未定义）</h2>
+                <p>示例：<span class="tang_code">var tang_undef;</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_undef"></span></p>
+                <p>变量已声明但尚未赋值时的默认值。</p>
+            </div>
+            <div class="tang_card">
+                <h2>5. Null（空值）</h2>
+                <p>示例：<span class="tang_code">var tang_null = null;</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_null"></span></p>
+                <p>表示"空"，返回 object 是 JavaScript 的历史遗留特性。</p>
+            </div>
+            <div class="tang_card">
+                <h2>6. Object（对象）</h2>
+                <p>示例：<span class="tang_code">var tang_obj = {name: "唐翊斌"};</span></p>
+                <p>typeof 结果：<span class="tang_result" id="tang_type_obj"></span></p>
+                <p>键值对的集合，函数、数组等也属于对象范畴。</p>
+            </div>
+        </div>
+        <a class="tang_back" href="index.html">← 返回首页</a>
+    </div>
+    <script>
+        var tang_str = "唐翊斌";
+        var tang_num = 3.14;
+        var tang_bool = true;
+        var tang_undef;
+        var tang_null = null;
+        var tang_obj = { name: "唐翊斌" };
+
+        document.getElementById("tang_type_str").textContent = typeof tang_str;
+        document.getElementById("tang_type_num").textContent = typeof tang_num;
+        document.getElementById("tang_type_bool").textContent = typeof tang_bool;
+        document.getElementById("tang_type_undef").textContent = typeof tang_undef;
+        document.getElementById("tang_type_null").textContent = typeof tang_null;
+        document.getElementById("tang_type_obj").textContent = typeof tang_obj;
+
+        console.log("六种数据类型 typeof 演示：");
+        console.log(typeof tang_str, typeof tang_num, typeof tang_bool, typeof tang_undef, typeof tang_null, typeof tang_obj);
+    </script>
+</body>
+</html>
