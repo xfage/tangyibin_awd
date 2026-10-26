@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-2 JavaScript程序结构：循环与条件</title>
+    <!-- 作者：唐翊斌，建立时间：2026-10-26 14:38，使用模型：GLM-5.3-Flash，功能名称：演示JavaScript程序结构：循环与条件 -->
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .tang_container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c5aa0;
+        }
+        .tang_intro {
+            background-color: #fff;
+            border-left: 5px solid #2c5aa0;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        .tang_code_inline {
+            font-family: Consolas, monospace;
+            background-color: #eef2f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c7254e;
+        }
+        .tang_cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .tang_card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+            padding: 16px 20px;
+            flex: 1 1 420px;
+            border-top: 4px solid #2c5aa0;
+        }
+        .tang_card h2 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #2c5aa0;
+        }
+        .tang_code {
+            display: block;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 10px 14px;
+            border-radius: 6px;
+            white-space: pre;
+            overflow-x: auto;
+            line-height: 1.6;
+            margin: 8px 0;
+        }
+        .tang_result {
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            background-color: #eef6ee;
+            border: 1px solid #b7d8b7;
+            color: #1a7f37;
+            padding: 8px 12px;
+            border-radius: 6px;
+            line-height: 1.7;
+            word-break: break-all;
+        }
+        .tang_btn {
+            background-color: #2c5aa0;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 18px;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .tang_btn:hover {
+            background-color: #1d437a;
+        }
+        .tang_back {
+            display: inline-block;
+            margin-top: 24px;
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+        .tang_back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_container">
+        <h1>JavaScript 程序结构：循环与条件</h1>
+        <div class="tang_intro">
+            <p>程序结构分为三种：<strong>顺序结构</strong>、<strong>条件（分支）结构</strong>和<strong>循环结构</strong>。本页面演示后两种：条件语句 <span class="tang_code_inline">if / else if / else</span> 与循环语句 <span class="tang_code_inline">for / while</span>，以及两者的结合应用。</p>
+        </div>
+        <div class="tang_cards">
+            <div class="tang_card">
+                <h2>1. for 循环 —— 求 1+2+…+100 的和</h2>
+                <code class="tang_code">var tang_sum = 0;
+for (var tang_i = 1; tang_i <= 100; tang_i++) {
+    tang_sum += tang_i;
+}</code>
+                <div class="tang_result" id="tang_for_result"></div>
+            </div>
+            <div class="tang_card">
+                <h2>2. while 循环 —— 倒计时输出</h2>
+                <code class="tang_code">var tang_n = 5;
+while (tang_n > 0) {
+    tang_n--;
+}</code>
+                <div class="tang_result" id="tang_while_result"></div>
+            </div>
+            <div class="tang_card">
+                <h2>3. if / else if / else 条件 —— 成绩等级</h2>
+                <code class="tang_code">if (tang_score >= 90)      等级 = "优秀";
+else if (tang_score >= 80) 等级 = "良好";
+else if (tang_score >= 60) 等级 = "及格";
+else                       等级 = "不及格";</code>
+                <div class="tang_result" id="tang_if_result"></div>
+                <button class="tang_btn" id="tang_btn_score" type="button">随机抽取一个成绩</button>
+            </div>
+            <div class="tang_card">
+                <h2>4. 循环 + 条件 —— FizzBuzz（1~30）</h2>
+                <code class="tang_code">for (var tang_i = 1; tang_i <= 30; tang_i++) {
+    if (tang_i % 15 === 0)      "FizzBuzz";
+    else if (tang_i % 3 === 0)  "Fizz";
+    else if (tang_i % 5 === 0)  "Buzz";
+    else                        tang_i;
+}</code>
+                <div class="tang_result" id="tang_fizz_result"></div>
+            </div>
+        </div>
+        <a class="tang_back" href="index.html">← 返回首页</a>
+    </div>
+    <script>
+        // 1. for 循环：累加求和
+        var tang_sum = 0;
+        for (var tang_i = 1; tang_i <= 100; tang_i++) {
+            tang_sum += tang_i;
+        }
+        document.getElementById("tang_for_result").textContent = "结果：1+2+…+100 = " + tang_sum;
+
+        // 2. while 循环：倒计时
+        var tang_n = 5;
+        var tang_output = "结果：";
+        while (tang_n > 0) {
+            tang_output += tang_n + " ";
+            tang_n--;
+        }
+        tang_output += "发射！";
+        document.getElementById("tang_while_result").textContent = tang_output;
+
+        // 3. if / else if / else：成绩等级
+        function tang_showScore() {
+            var tang_score = Math.floor(Math.random() * 101); // 0~100 的随机整数
+            var tang_level;
+            if (tang_score >= 90) {
+                tang_level = "优秀";
+            } else if (tang_score >= 80) {
+                tang_level = "良好";
+            } else if (tang_score >= 60) {
+                tang_level = "及格";
+            } else {
+                tang_level = "不及格";
+            }
+            document.getElementById("tang_if_result").textContent = "结果：分数 " + tang_score + " 分，等级为「" + tang_level + "」";
+        }
+        document.getElementById("tang_btn_score").onclick = tang_showScore;
+        tang_showScore();
+
+        // 4. 循环 + 条件结合：FizzBuzz
+        var tang_fizz = "结果：";
+        for (var tang_j = 1; tang_j <= 30; tang_j++) {
+            if (tang_j % 15 === 0) {
+                tang_fizz += "FizzBuzz ";
+            } else if (tang_j % 3 === 0) {
+                tang_fizz += "Fizz ";
+            } else if (tang_j % 5 === 0) {
+                tang_fizz += "Buzz ";
+            } else {
+                tang_fizz += tang_j + " ";
+            }
+        }
+        document.getElementById("tang_fizz_result").textContent = tang_fizz;
+    </script>
+</body>
+</html>
