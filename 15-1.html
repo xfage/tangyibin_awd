@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-1 数7游戏</title>
+    <!-- 姓名：唐翊斌，日期：2026-10-26，功能名称：数7游戏——100个盒子按规则显示数字或空盒子 -->
+    <style>
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .tang_container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c5aa0;
+        }
+        .tang_intro {
+            background-color: #fff;
+            border-left: 5px solid #2c5aa0;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+        .tang_box-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+        }
+        .tang_box {
+            aspect-ratio: 1 / 1;
+            background-color: #fff;
+            border: 2px solid #2c5aa0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Consolas, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c5aa0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+        }
+        .tang_box.tang_skip {
+            border: 2px dashed #c7254e;
+            background-color: #fdf2f5;
+            color: transparent;
+            box-shadow: none;
+        }
+        .tang_box:hover {
+            transform: scale(1.08);
+            transition: transform 0.15s;
+        }
+        .tang_legend {
+            margin-top: 20px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .tang_legend span {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+        .tang_legend_normal {
+            background-color: #fff;
+            border: 2px solid #2c5aa0;
+        }
+        .tang_legend_skip {
+            background-color: #fdf2f5;
+            border: 2px dashed #c7254e;
+        }
+        .tang_back {
+            display: inline-block;
+            margin-top: 24px;
+            color: #2c5aa0;
+            text-decoration: none;
+        }
+        .tang_back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_container">
+        <h1>数7游戏 —— 一百个盒子</h1>
+        <div class="tang_intro">
+            <p>按照数7规则：凡是 <strong>7 的倍数</strong>，或数字中 <strong>含有数字 7</strong>（个位是 7、十位是 7）的盒子，都应该"拍手跳过"，显示为<strong>空盒子</strong>；其余数字正常显示。把鼠标移到空盒子上即可看到被跳过的数字。</p>
+        </div>
+        <div class="tang_box-grid" id="tang_grid"></div>
+        <div class="tang_legend">
+            <p><span class="tang_legend_normal"></span>不满足要求 —— 显示数字</p>
+            <p><span class="tang_legend_skip"></span>满足要求（7 的倍数或含 7）—— 显示空盒子（悬停可查看）</p>
+        </div>
+        <a class="tang_back" href="index.html">← 返回首页</a>
+    </div>
+    <script>
+        var tang_grid = document.getElementById("tang_grid");
+
+        // 判断是否满足数7要求：7 的倍数，或个位、十位含 7
+        function tang_isSkip(tang_n) {
+            return tang_n % 7 === 0 || tang_n % 10 === 7 || Math.floor(tang_n / 10) === 7;
+        }
+
+        for (var tang_i = 1; tang_i <= 100; tang_i++) {
+            var tang_box = document.createElement("div");
+            tang_box.className = "tang_box";
+            tang_box.textContent = tang_i;
+            if (tang_isSkip(tang_i)) {
+                tang_box.classList.add("tang_skip");
+                tang_box.title = "被跳过的数字：" + tang_i;
+            }
+            tang_grid.appendChild(tang_box);
+        }
+    </script>
+</body>
+</html>
