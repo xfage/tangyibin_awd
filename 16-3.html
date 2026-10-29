@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-3 数字资源公告</title>
+    <!-- 作者：唐翊斌，建立时间：2026-10-29 17:40，使用模型：Hy3，功能名称：数字资源公告列表页面（仿图还原） -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #fff;
+            color: #333;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.5;
+            padding: 40px 0 60px;
+        }
+        .tang_widget {
+            width: min(656px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        /* 头部：图标 + 标题 + 更多 */
+        .tang_head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        .tang_head_left {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 13px;
+            border-bottom: 5px solid #3a6fd8;
+        }
+        .tang_head_icon {
+            color: #3a6fd8;
+            font-size: 26px;
+        }
+        .tang_head_title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1d3a6d;
+            letter-spacing: 1px;
+        }
+        .tang_more {
+            font-size: 16px;
+            color: #3a6fd8;
+            text-decoration: none;
+            line-height: 34px;
+        }
+        .tang_more:hover { text-decoration: underline; }
+
+        /* 公告列表 */
+        .tang_list { margin-top: 6px; }
+        .tang_item {
+            display: flex;
+            align-items: center;
+            gap: 26px;
+            padding: 15px 2px;
+            border-bottom: 1px solid #ececec;
+            text-decoration: none;
+        }
+        .tang_date {
+            flex: 0 0 auto;
+            width: 62px;
+            font-size: 20px;
+            color: #9a9a9a;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        .tang_title {
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 17px;
+            color: #444;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .tang_item:hover .tang_title { color: #3a6fd8; }
+        .tang_item.tang_hot .tang_title { color: #e60012; }
+        .tang_item.tang_hot:hover .tang_title { color: #c00010; }
+
+        .tang_back {
+            display: inline-block;
+            margin: 46px auto 0;
+            color: #3a6fd8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot_wrap { text-align: center; }
+        .tang_foot { margin-top: 14px; color: #bbb; font-size: 12px; text-align: center; }
+
+        @media (max-width: 480px) {
+            .tang_head_title { font-size: 20px; }
+            .tang_date { font-size: 16px; width: 52px; }
+            .tang_title { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_widget">
+        <div class="tang_head">
+            <div class="tang_head_left">
+                <i class="iconfont tang_head_icon">&#xe738;</i>
+                <span class="tang_head_title">数字资源公告</span>
+            </div>
+            <a class="tang_more" href="#">更多</a>
+        </div>
+
+        <div class="tang_list">
+            <a class="tang_item tang_hot" href="#">
+                <span class="tang_date">06.09</span>
+                <span class="tang_title">首都图书馆数据库试用通知</span>
+            </a>
+            <a class="tang_item tang_hot" href="#">
+                <span class="tang_date">09.28</span>
+                <span class="tang_title">“共襄华诞，喜阅金秋”数字资源专区上线！</span>
+            </a>
+            <a class="tang_item tang_hot" href="#">
+                <span class="tang_date">09.01</span>
+                <span class="tang_title">重温光辉岁月！“山河入简 红韵承章”数字资源专区正式上线</span>
+            </a>
+            <a class="tang_item" href="#">
+                <span class="tang_date">10.22</span>
+                <span class="tang_title">艺术鉴赏丨纪念长征胜利90周年：跨越九十年的艺术长卷</span>
+            </a>
+            <a class="tang_item" href="#">
+                <span class="tang_date">10.22</span>
+                <span class="tang_title">影音听书丨纪念长征胜利90周年：在声音里重温峥嵘岁月</span>
+            </a>
+            <a class="tang_item" href="#">
+                <span class="tang_date">10.22</span>
+                <span class="tang_title">报刊推荐丨纪念长征胜利90周年：翻阅《长征》里的滚烫篇章</span>
+            </a>
+            <a class="tang_item" href="#">
+                <span class="tang_date">10.22</span>
+                <span class="tang_title">图书推荐丨纪念长征胜利90周年：史脉寻踪 山河共读</span>
+            </a>
+            <a class="tang_item" href="#">
+                <span class="tang_date">10.22</span>
+                <span class="tang_title">山河为证，精神永续丨长征胜利九十载，相约首都图书馆</span>
+            </a>
+        </div>
+
+        <div class="tang_foot_wrap">
+            <a class="tang_back" href="index.html">← 返回首页</a>
+            <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+        </div>
+    </div>
+</body>
+</html>

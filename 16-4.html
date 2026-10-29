@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-4 最新上市 / 即将上市</title>
+    <!-- 作者：唐翊斌，建立时间：2026-10-29 18:05，使用模型：Hy3，功能名称：最新上市与即将上市车型列表（选项卡切换，仿图还原） -->
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #fff;
+            color: #333;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.5;
+            padding: 40px 0 60px;
+        }
+        .tang_widget {
+            width: min(320px, calc(100% - 32px));
+            margin: 0 auto;
+            border: 1px solid #dfe6f0;
+        }
+
+        /* 选项卡 */
+        .tang_tabs { display: flex; background: #e3eefb; }
+        .tang_tab {
+            flex: 1;
+            text-align: center;
+            padding: 9px 0;
+            font-size: 14px;
+            color: #33507e;
+            background: #e3eefb;
+            cursor: pointer;
+            user-select: none;
+            border-right: 1px solid #d3e2f5;
+        }
+        .tang_tab:last-child { border-right: none; }
+        .tang_tab:hover { background: #dbe8f8; }
+        .tang_tab.tang_active {
+            background: #fff;
+            color: #1d4fa0;
+            border-top: 3px solid #1d4fa0;
+            padding-top: 6px;
+            font-weight: 700;
+        }
+
+        /* 表格 */
+        .tang_table { width: 100%; border-collapse: collapse; display: none; }
+        .tang_table.tang_show { display: table; }
+        .tang_table th {
+            background: #fff;
+            color: #8795ad;
+            font-size: 12px;
+            font-weight: 400;
+            text-align: left;
+            padding: 7px 10px;
+            white-space: nowrap;
+        }
+        .tang_table td {
+            font-size: 12px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+        }
+        .tang_table tbody tr:last-child td { border-bottom: none; }
+        .tang_table tbody tr:hover { background: #f6f9fd; }
+        .tang_date { color: #999; width: 66px; }
+        .tang_name { color: #333; }
+        .tang_price { color: #888; text-align: right; }
+
+        .tang_back {
+            display: inline-block;
+            margin: 46px auto 0;
+            color: #3b76d2;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot_wrap { text-align: center; }
+        .tang_foot { margin-top: 14px; color: #bbb; font-size: 12px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="tang_widget">
+        <div class="tang_tabs">
+            <div class="tang_tab tang_active" id="tang_tab_new" data-target="tang_panel_new">最新上市</div>
+            <div class="tang_tab" id="tang_tab_soon" data-target="tang_panel_soon">即将上市</div>
+        </div>
+
+        <!-- 最新上市 -->
+        <table class="tang_table tang_show" id="tang_panel_new">
+            <thead>
+                <tr>
+                    <th>上市时间</th>
+                    <th>品牌/车型</th>
+                    <th style="text-align:right;">售价（万元）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tang_date">12月13日</td>
+                    <td class="tang_name">沃尔沃S60L</td>
+                    <td class="tang_price">26.98-38.49</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月12日</td>
+                    <td class="tang_name">Jeep牧马人龙腾典藏</td>
+                    <td class="tang_price">47.99-59.99</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月10日</td>
+                    <td class="tang_name">一汽大众高尔夫7</td>
+                    <td class="tang_price">11.89-18.29</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月6日</td>
+                    <td class="tang_name">2014款古思特</td>
+                    <td class="tang_price">419.0-666.0</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月5日</td>
+                    <td class="tang_name">起亚新K5</td>
+                    <td class="tang_price">15.98-25.18</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月5日</td>
+                    <td class="tang_name">2014款奥迪A3</td>
+                    <td class="tang_price">22.98-28.98</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- 即将上市 -->
+        <table class="tang_table" id="tang_panel_soon">
+            <thead>
+                <tr>
+                    <th>上市时间</th>
+                    <th>品牌/车型</th>
+                    <th style="text-align:right;">售价（万元）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="tang_date">12月20日</td>
+                    <td class="tang_name">2014款大众迈腾</td>
+                    <td class="tang_price">19.98-29.28</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月26日</td>
+                    <td class="tang_name">广汽本田新飞度</td>
+                    <td class="tang_price">7.38-11.28</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">12月28日</td>
+                    <td class="tang_name">东风标致新408</td>
+                    <td class="tang_price">12.69-17.19</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">1月8日</td>
+                    <td class="tang_name">北京奔驰新C级</td>
+                    <td class="tang_price">31.48-45.98</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">1月15日</td>
+                    <td class="tang_name">上汽荣威350 PLUS</td>
+                    <td class="tang_price">7.57-12.87</td>
+                </tr>
+                <tr>
+                    <td class="tang_date">1月20日</td>
+                    <td class="tang_name">长安福特新蒙迪欧</td>
+                    <td class="tang_price">17.98-26.58</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tang_foot_wrap">
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        // 选项卡切换
+        var tang_tabs = document.querySelectorAll(".tang_tab");
+        tang_tabs.forEach(function (tab) {
+            tab.addEventListener("click", function () {
+                tang_tabs.forEach(function (t) { t.classList.remove("tang_active"); });
+                tab.classList.add("tang_active");
+                document.querySelectorAll(".tang_table").forEach(function (panel) {
+                    panel.classList.remove("tang_show");
+                });
+                document.getElementById(tab.getAttribute("data-target")).classList.add("tang_show");
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-1 JavaScript 数组的常用方法</title>
+    <!-- 作者：唐翊斌，建立时间：2026-10-29 16:30，使用模型：Hy3，功能名称：JavaScript 数组主要方法可视化演示 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f4f7fa;
+            --card: #ffffff;
+            --line: #e1e7ee;
+            --blue: #215a70;
+            --orange: #e66a3d;
+            --green: #3f8e8c;
+            --shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .tang_head .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px;
+            border-radius: 14px; color: #fff; font-size: 26px;
+            background: linear-gradient(135deg, var(--blue), var(--green));
+            box-shadow: var(--shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 26px; padding: 14px 18px; border-radius: 10px;
+            background: #eef4f8; border-left: 4px solid var(--blue);
+            font-size: 14px; color: #2c3e46;
+        }
+        .tang_tip b { color: var(--blue); }
+
+        /* 当前数组展示区 */
+        .tang_stage {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 32px;
+        }
+        .tang_stage_top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .tang_stage_title { font-size: 18px; font-weight: 700; }
+        .tang_stage_title i { color: var(--orange); margin-right: 6px; }
+        .tang_reset {
+            background: var(--orange); color: #fff; border: none; border-radius: 8px;
+            padding: 8px 18px; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_reset:hover { background: #cf5a2f; }
+        .tang_array {
+            display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0;
+            margin-top: 18px; min-height: 84px;
+        }
+        .tang_cell {
+            position: relative; width: 64px; height: 64px; margin: 0 4px;
+            border-radius: 12px; color: #fff; display: grid; place-items: center;
+            font-size: 22px; font-weight: 700; box-shadow: 0 6px 16px rgba(0,0,0,.14);
+            animation: tang_pop .35s ease;
+        }
+        .tang_cell::after {
+            content: attr(data-idx);
+            position: absolute; bottom: -22px; left: 0; right: 0;
+            text-align: center; color: var(--muted); font-size: 12px; font-weight: 400;
+        }
+        @keyframes tang_pop {
+            from { transform: scale(.4) translateY(14px); opacity: 0; }
+            to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .tang_arr_info { margin-top: 30px; color: var(--muted); font-size: 13px; }
+        .tang_bracket { color: var(--orange); font-weight: 700; font-size: 26px; align-self: center; }
+
+        /* 方法卡片 */
+        .tang_group_title { font-size: 20px; margin: 26px 0 14px; display: flex; align-items: center; gap: 8px; }
+        .tang_group_title i { color: var(--blue); }
+        .tang_grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .tang_card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 18px 20px; transition: transform .2s ease, border-color .2s ease;
+        }
+        .tang_card:hover { transform: translateY(-4px); border-color: var(--blue); }
+        .tang_card_top { display: flex; gap: 12px; align-items: flex-start; }
+        .tang_mico {
+            flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px;
+            display: grid; place-items: center; font-size: 20px; color: #fff;
+            background: linear-gradient(135deg, var(--blue), var(--green));
+        }
+        .tang_method { font-size: 17px; font-weight: 700; }
+        .tang_tag { font-style: normal; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+        .tang_tag_mut { background: #fde8df; color: var(--orange); }
+        .tang_tag_new { background: #e3f0ef; color: var(--green); }
+        .tang_desc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .tang_code {
+            display: block; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+            background: #2d2d2d; color: #f8f8f2; padding: 10px 14px; border-radius: 8px;
+            margin: 12px 0; white-space: pre-wrap; word-break: break-all;
+        }
+        .tang_row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .tang_btn {
+            background: var(--blue); color: #fff; border: none; border-radius: 8px;
+            padding: 8px 18px; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #184559; }
+        .tang_out { font-size: 13px; color: #2c3e46; word-break: break-all; }
+        .tang_out_label { color: var(--muted); margin-right: 6px; }
+        .tang_mini {
+            display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 6px;
+            margin: 0 4px 4px 0; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 700;
+            box-shadow: 0 3px 8px rgba(0,0,0,.14);
+        }
+        .tang_str { font-family: Consolas, monospace; background: #eef2f7; color: #c7254e; padding: 2px 8px; border-radius: 6px; }
+        .tang_empty { color: var(--muted); font-style: italic; }
+
+        .tang_back {
+            display: inline-block; margin-top: 40px; color: var(--blue);
+            text-decoration: none; font-size: 15px;
+        }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+        @media (max-width: 720px) {
+            .tang_grid { grid-template-columns: 1fr; }
+            .tang_shell { width: calc(100% - 28px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe600;</i></div>
+            <div>
+                <h1>JavaScript 数组的常用方法</h1>
+                <p>把数组想象成一排彩色盒子 —— 每个方法就是对这排盒子的一次“操作”</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>怎么玩：</b>下面这排盒子就是当前的数组。点击任意方法的 <b>运行</b> 按钮，
+            带 <span style="color:var(--orange)">改原数组</span> 标签的方法会直接改变上面的盒子；
+            带 <span style="color:var(--green)">返回新数组</span> 标签的方法不会改动原数组，只在卡片里展示结果。
+            随时点 <b>重置</b> 还原。
+        </div>
+
+        <!-- 当前数组 -->
+        <div class="tang_stage">
+            <div class="tang_stage_top">
+                <div class="tang_stage_title"><i class="iconfont">&#xeaf9;</i>当前数组 arr</div>
+                <button class="tang_reset" id="tang_btn_reset" type="button">↺ 重置数组</button>
+            </div>
+            <div class="tang_array" id="tang_array_view"></div>
+            <div class="tang_arr_info" id="tang_arr_info"></div>
+        </div>
+
+        <!-- 第一组：增删与修改（改变原数组） -->
+        <div class="tang_group_title"><i class="iconfont">&#xe600;</i>一、增删与修改（改变原数组）</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xeaf9;</i>
+                    <div>
+                        <div class="tang_method">push() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">在数组末尾追加一个元素，返回新长度。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.push(新元素)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="push">运行</button><span class="tang_out" id="tang_out_push"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe642;</i>
+                    <div>
+                        <div class="tang_method">pop() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">删除并返回数组末尾的元素。</div>
+                    </div>
+                </div>
+                <code class="tang_code">var tang_v = arr.pop()</code>
+                <div class="tang_row"><button class="tang_btn" data-act="pop">运行</button><span class="tang_out" id="tang_out_pop"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xeaf9;</i>
+                    <div>
+                        <div class="tang_method">unshift() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">在数组开头插入一个元素，返回新长度。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.unshift(新元素)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="unshift">运行</button><span class="tang_out" id="tang_out_unshift"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe642;</i>
+                    <div>
+                        <div class="tang_method">shift() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">删除并返回数组开头的元素。</div>
+                    </div>
+                </div>
+                <code class="tang_code">var tang_v = arr.shift()</code>
+                <div class="tang_row"><button class="tang_btn" data-act="shift">运行</button><span class="tang_out" id="tang_out_shift"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe600;</i>
+                    <div>
+                        <div class="tang_method">splice() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">在任意位置删除/插入元素，返回被删除的部分。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.splice(2, 1, 新元素)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="splice">运行</button><span class="tang_out" id="tang_out_splice"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe708;</i>
+                    <div>
+                        <div class="tang_method">slice() <em class="tang_tag tang_tag_new">返回新数组</em></div>
+                        <div class="tang_desc">截取 [start, end) 区间，不改变原数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.slice(1, 3)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="slice">运行</button><span class="tang_out" id="tang_out_slice"></span></div>
+            </div>
+        </div>
+
+        <!-- 第二组：查询、提取与合并 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe6bb;</i>二、查询、提取与合并（不改变原数组）</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xeaf9;</i>
+                    <div>
+                        <div class="tang_method">concat() <em class="tang_tag tang_tag_new">返回新数组</em></div>
+                        <div class="tang_desc">合并多个数组，原数组保持不变。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.concat([11, 22])</code>
+                <div class="tang_row"><button class="tang_btn" data-act="concat">运行</button><span class="tang_out" id="tang_out_concat"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe642;</i>
+                    <div>
+                        <div class="tang_method">join() <em class="tang_tag tang_tag_new">返回字符串</em></div>
+                        <div class="tang_desc">用分隔符把元素拼成一个字符串。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.join("-")</code>
+                <div class="tang_row"><button class="tang_btn" data-act="join">运行</button><span class="tang_out" id="tang_out_join"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">indexOf() <em class="tang_tag tang_tag_new">返回索引</em></div>
+                        <div class="tang_desc">查找元素首次出现的位置，找不到返回 -1。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.indexOf(9)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="indexof">运行</button><span class="tang_out" id="tang_out_indexof"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">includes() <em class="tang_tag tang_tag_new">返回布尔</em></div>
+                        <div class="tang_desc">判断数组是否包含某个元素。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.includes(5)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="includes">运行</button><span class="tang_out" id="tang_out_includes"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">find() <em class="tang_tag tang_tag_new">返回元素</em></div>
+                        <div class="tang_desc">返回第一个满足条件的元素。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.find(x =&gt; x &gt; 5)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="find">运行</button><span class="tang_out" id="tang_out_find"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe891;</i>
+                    <div>
+                        <div class="tang_method">forEach() <em class="tang_tag tang_tag_new">仅遍历</em></div>
+                        <div class="tang_desc">对每一个元素执行一次回调，无返回值。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.forEach((v, i) =&gt; ...)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="foreach">运行</button><span class="tang_out" id="tang_out_foreach"></span></div>
+            </div>
+        </div>
+
+        <!-- 第三组：遍历与生成新数组 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe63e;</i>三、遍历与生成新数组（不改变原数组）</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe63e;</i>
+                    <div>
+                        <div class="tang_method">map() <em class="tang_tag tang_tag_new">返回新数组</em></div>
+                        <div class="tang_desc">对每个元素计算后生成同长度的新数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.map(x =&gt; x * 2)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="map">运行</button><span class="tang_out" id="tang_out_map"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe610;</i>
+                    <div>
+                        <div class="tang_method">filter() <em class="tang_tag tang_tag_new">返回新数组</em></div>
+                        <div class="tang_desc">筛选出满足条件的元素组成新数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.filter(x =&gt; x &gt; 4)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="filter">运行</button><span class="tang_out" id="tang_out_filter"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe61e;</i>
+                    <div>
+                        <div class="tang_method">reduce() <em class="tang_tag tang_tag_new">返回累计值</em></div>
+                        <div class="tang_desc">把数组“累积”成一个值，例如求和。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.reduce((s, x) =&gt; s + x, 0)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="reduce">运行</button><span class="tang_out" id="tang_out_reduce"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe64c;</i>
+                    <div>
+                        <div class="tang_method">reverse() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">原地反转数组的元素顺序。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.reverse()</code>
+                <div class="tang_row"><button class="tang_btn" data-act="reverse">运行</button><span class="tang_out" id="tang_out_reverse"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe620;</i>
+                    <div>
+                        <div class="tang_method">sort() <em class="tang_tag tang_tag_mut">改原数组</em></div>
+                        <div class="tang_desc">按比较函数排序（此处从小到大）。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.sort((a, b) =&gt; a - b)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="sort">运行</button><span class="tang_out" id="tang_out_sort"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe708;</i>
+                    <div>
+                        <div class="tang_method">length <em class="tang_tag tang_tag_new">属性</em></div>
+                        <div class="tang_desc">数组的元素个数，可读取也可修改。</div>
+                    </div>
+                </div>
+                <code class="tang_code">arr.length</code>
+                <div class="tang_row"><button class="tang_btn" data-act="length">运行</button><span class="tang_out" id="tang_out_length"></span></div>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        var tang_INITIAL = [3, 7, 1, 9, 5];
+        var tang_arr = tang_INITIAL.slice();
+        var tang_colors = ["#e66a3d", "#215a70", "#3f8e8c", "#c9a227", "#8e6c9c", "#d1696e", "#2c8a6b", "#b5651d"];
+
+        // 渲染主数组（一排彩色盒子）
+        function tang_render() {
+            var view = document.getElementById("tang_array_view");
+            view.innerHTML = "";
+            var left = document.createElement("span");
+            left.className = "tang_bracket"; left.textContent = "[";
+            var right = document.createElement("span");
+            right.className = "tang_bracket"; right.textContent = "]";
+            view.appendChild(left);
+            tang_arr.forEach(function (v, i) {
+                var cell = document.createElement("div");
+                cell.className = "tang_cell";
+                cell.style.background = tang_colors[i % tang_colors.length];
+                cell.setAttribute("data-idx", i);
+                cell.textContent = v;
+                view.appendChild(cell);
+            });
+            view.appendChild(right);
+            document.getElementById("tang_arr_info").textContent = "长度 length = " + tang_arr.length + "　（盒子下方数字为索引，从 0 开始）";
+        }
+
+        // 在输出区渲染一个新数组（小色块）
+        function tang_setArr(id, label, arr) {
+            var el = document.getElementById(id);
+            el.innerHTML = "";
+            var lab = document.createElement("span");
+            lab.className = "tang_out_label";
+            lab.textContent = label;
+            el.appendChild(lab);
+            if (arr.length === 0) {
+                var e = document.createElement("span");
+                e.className = "tang_empty";
+                e.textContent = "[ 空数组 ]";
+                el.appendChild(e);
+                return;
+            }
+            arr.forEach(function (v, i) {
+                var c = document.createElement("span");
+                c.className = "tang_mini";
+                c.style.background = tang_colors[i % tang_colors.length];
+                c.textContent = v;
+                el.appendChild(c);
+            });
+        }
+
+        function tang_set(id, text) {
+            document.getElementById(id).textContent = text;
+        }
+
+        function tang_rand() {
+            return Math.floor(Math.random() * 90) + 10; // 10~99
+        }
+
+        function tang_run(act) {
+            switch (act) {
+                case "push":
+                    var pv = tang_rand();
+                    tang_arr.push(pv);
+                    tang_render();
+                    tang_set("tang_out_push", "返回新长度：" + tang_arr.length + "（末尾 +" + pv + "）");
+                    break;
+                case "pop":
+                    if (tang_arr.length === 0) { tang_set("tang_out_pop", "数组已空，无法 pop"); break; }
+                    var pv2 = tang_arr.pop();
+                    tang_render();
+                    tang_set("tang_out_pop", "弹出末尾元素：" + pv2);
+                    break;
+                case "unshift":
+                    var uv = tang_rand();
+                    tang_arr.unshift(uv);
+                    tang_render();
+                    tang_set("tang_out_unshift", "返回新长度：" + tang_arr.length + "（开头 +" + uv + "）");
+                    break;
+                case "shift":
+                    if (tang_arr.length === 0) { tang_set("tang_out_shift", "数组已空，无法 shift"); break; }
+                    var sv = tang_arr.shift();
+                    tang_render();
+                    tang_set("tang_out_shift", "移除开头元素：" + sv);
+                    break;
+                case "splice":
+                    var ins = tang_rand();
+                    var idx = Math.min(2, tang_arr.length - 1 < 0 ? 0 : tang_arr.length - 1);
+                    if (tang_arr.length === 0) { tang_set("tang_out_splice", "数组为空，无法 splice"); break; }
+                    var removed = tang_arr.splice(idx, 1, ins);
+                    tang_render();
+                    tang_set("tang_out_splice", "在索引 " + idx + " 处删除 [" + removed.join(",") + "]，插入 " + ins);
+                    break;
+                case "slice":
+                    tang_setArr("tang_out_slice", "arr.slice(1, 3) →", tang_arr.slice(1, 3));
+                    break;
+                case "concat":
+                    tang_setArr("tang_out_concat", "arr.concat([11,22]) →", tang_arr.concat([11, 22]));
+                    break;
+                case "join":
+                    var js = tang_arr.join("-");
+                    document.getElementById("tang_out_join").innerHTML =
+                        '<span class="tang_out_label">arr.join("-") →</span><span class="tang_str">"' + js + '"</span>';
+                    break;
+                case "indexof":
+                    var t1 = 9;
+                    var r1 = tang_arr.indexOf(t1);
+                    tang_set("tang_out_indexof", "arr.indexOf(" + t1 + ") = " + r1 + (r1 >= 0 ? "（在索引 " + r1 + " 找到）" : "（未找到，返回 -1）"));
+                    break;
+                case "includes":
+                    var t2 = 5;
+                    tang_set("tang_out_includes", "arr.includes(" + t2 + ") = " + tang_arr.includes(t2));
+                    break;
+                case "find":
+                    var r2 = tang_arr.find(function (x) { return x > 5; });
+                    tang_set("tang_out_find", "arr.find(x => x > 5) = " + (r2 === undefined ? "undefined（无匹配）" : r2));
+                    break;
+                case "foreach":
+                    var s = "";
+                    tang_arr.forEach(function (v, i) { s += "[" + i + "]=" + v + "  "; });
+                    tang_set("tang_out_foreach", "依次遍历 → " + s);
+                    break;
+                case "map":
+                    tang_setArr("tang_out_map", "arr.map(x => x*2) →", tang_arr.map(function (x) { return x * 2; }));
+                    break;
+                case "filter":
+                    tang_setArr("tang_out_filter", "arr.filter(x => x>4) →", tang_arr.filter(function (x) { return x > 4; }));
+                    break;
+                case "reduce":
+                    var sum = tang_arr.reduce(function (s, x) { return s + x; }, 0);
+                    tang_set("tang_out_reduce", "arr.reduce(累加, 0) = " + sum + "（所有元素之和）");
+                    break;
+                case "reverse":
+                    tang_arr.reverse();
+                    tang_render();
+                    tang_set("tang_out_reverse", "已反转数组顺序");
+                    break;
+                case "sort":
+                    tang_arr.sort(function (a, b) { return a - b; });
+                    tang_render();
+                    tang_set("tang_out_sort", "已按从小到大排序");
+                    break;
+                case "length":
+                    tang_set("tang_out_length", "当前 arr.length = " + tang_arr.length);
+                    break;
+            }
+        }
+
+        // 绑定按钮
+        document.querySelectorAll(".tang_btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                tang_run(btn.getAttribute("data-act"));
+            });
+        });
+
+        document.getElementById("tang_btn_reset").addEventListener("click", function () {
+            tang_arr = tang_INITIAL.slice();
+            tang_render();
+        });
+
+        tang_render();
+    </script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16-2 JavaScript 对象</title>
+    <!-- 作者：唐翊斌，建立时间：2026-10-29 17:10，使用模型：Hy3，功能名称：JavaScript 对象可视化演示 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f4f7fa;
+            --card: #ffffff;
+            --line: #e1e7ee;
+            --blue: #215a70;
+            --orange: #e66a3d;
+            --green: #3f8e8c;
+            --purple: #8e6c9c;
+            --shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh; color: var(--ink); background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .tang_head .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--purple), var(--blue));
+            box-shadow: var(--shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 26px; padding: 14px 18px; border-radius: 10px;
+            background: #f0eef6; border-left: 4px solid var(--purple); font-size: 14px; color: #2c3e46;
+        }
+        .tang_tip b { color: var(--purple); }
+
+        /* 当前对象展示区 —— 档案卡 */
+        .tang_stage {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 22px 24px; margin-bottom: 32px;
+        }
+        .tang_stage_top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+        .tang_stage_title { font-size: 18px; font-weight: 700; }
+        .tang_stage_title i { color: var(--orange); margin-right: 6px; }
+        .tang_reset {
+            background: var(--orange); color: #fff; border: none; border-radius: 8px;
+            padding: 8px 18px; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_reset:hover { background: #cf5a2f; }
+        .tang_idcard {
+            display: flex; gap: 18px; align-items: center; margin-top: 16px;
+            padding: 16px; border-radius: 12px; background: linear-gradient(135deg, #f7f4fb, #eef3f8);
+            border: 1px dashed var(--line);
+        }
+        .tang_avatar {
+            flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%;
+            display: grid; place-items: center; font-size: 32px; color: #fff;
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+        }
+        .tang_props { flex: 1 1 auto; }
+        .tang_prop {
+            display: flex; align-items: center; gap: 8px; padding: 6px 0;
+            border-bottom: 1px dashed #e4e9ef; animation: tang_in .3s ease;
+        }
+        .tang_prop:last-child { border-bottom: none; }
+        .tang_key {
+            min-width: 70px; font-weight: 700; color: var(--blue);
+            font-family: Consolas, monospace;
+        }
+        .tang_colon { color: var(--muted); }
+        .tang_val {
+            display: inline-grid; place-items: center; min-width: 46px; padding: 3px 12px;
+            border-radius: 8px; color: #fff; font-weight: 700; font-size: 15px;
+            box-shadow: 0 3px 8px rgba(0,0,0,.12);
+        }
+        @keyframes tang_in { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+        .tang_obj_info { margin-top: 14px; color: var(--muted); font-size: 13px; }
+        .tang_empty_obj { color: var(--muted); font-style: italic; padding: 10px 0; }
+
+        /* 方法/操作卡片 */
+        .tang_group_title { font-size: 20px; margin: 26px 0 14px; display: flex; align-items: center; gap: 8px; }
+        .tang_group_title i { color: var(--purple); }
+        .tang_grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .tang_card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 18px 20px; transition: transform .2s ease, border-color .2s ease;
+        }
+        .tang_card:hover { transform: translateY(-4px); border-color: var(--purple); }
+        .tang_card_top { display: flex; gap: 12px; align-items: flex-start; }
+        .tang_mico {
+            flex: 0 0 auto; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+            font-size: 20px; color: #fff; background: linear-gradient(135deg, var(--purple), var(--blue));
+        }
+        .tang_method { font-size: 17px; font-weight: 700; }
+        .tang_tag { font-style: normal; font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; vertical-align: middle; }
+        .tang_tag_mut { background: #fde8df; color: var(--orange); }
+        .tang_tag_new { background: #e3f0ef; color: var(--green); }
+        .tang_desc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+        .tang_code {
+            display: block; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+            background: #2d2d2d; color: #f8f8f2; padding: 10px 14px; border-radius: 8px;
+            margin: 12px 0; white-space: pre-wrap; word-break: break-all;
+        }
+        .tang_row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .tang_btn {
+            background: var(--purple); color: #fff; border: none; border-radius: 8px;
+            padding: 8px 18px; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #755a82; }
+        .tang_out { font-size: 13px; color: #2c3e46; word-break: break-all; }
+        .tang_out_label { color: var(--muted); margin-right: 6px; }
+        .tang_mini {
+            display: inline-grid; place-items: center; min-width: 30px; height: 30px; padding: 0 8px;
+            margin: 0 4px 4px 0; border-radius: 8px; color: #fff; font-size: 14px; font-weight: 700;
+            box-shadow: 0 3px 8px rgba(0,0,0,.14);
+        }
+        .tang_pair {
+            display: inline-flex; align-items: center; gap: 4px; margin: 0 6px 4px 0;
+            padding: 4px 8px; border-radius: 8px; background: #eef2f7; font-size: 13px; font-family: Consolas, monospace;
+        }
+        .tang_pair b { color: var(--blue); }
+        .tang_str { font-family: Consolas, monospace; background: #eef2f7; color: #c7254e; padding: 2px 8px; border-radius: 6px; word-break: break-all; }
+        .tang_empty { color: var(--muted); font-style: italic; }
+
+        /* 嵌套对象示例 */
+        .tang_nested { margin-top: 10px; padding: 12px 14px; border-radius: 10px; background: #f7f4fb; border: 1px solid var(--line); }
+        .tang_nested .tang_prop { padding: 4px 0; }
+        .tang_nested .tang_sub {
+            margin-left: 24px; padding-left: 14px; border-left: 2px solid var(--purple);
+        }
+
+        .tang_back { display: inline-block; margin-top: 40px; color: var(--purple); text-decoration: none; font-size: 15px; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+        @media (max-width: 720px) {
+            .tang_grid { grid-template-columns: 1fr; }
+            .tang_shell { width: calc(100% - 28px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe620;</i></div>
+            <div>
+                <h1>JavaScript 对象（Object）</h1>
+                <p>把对象想象成一张“贴了标签的档案卡”——每个标签（键 key）对应一格内容（值 value）</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>怎么玩：</b>下面这张<b>档案卡</b>就是一个 JavaScript 对象。点击任意操作的 <b>运行</b> 按钮，
+            带 <span style="color:var(--orange)">改原对象</span> 标签的操作会直接增删改卡片里的字段；
+            带 <span style="color:var(--green)">返回结果</span> 标签的操作只在卡片里展示结果，不改动卡片。
+            随时点 <b>重置</b> 还原。
+        </div>
+
+        <!-- 当前对象 -->
+        <div class="tang_stage">
+            <div class="tang_stage_top">
+                <div class="tang_stage_title"><i class="iconfont">&#xeaf9;</i>当前对象 obj（一张档案卡）</div>
+                <button class="tang_reset" id="tang_btn_reset" type="button">↺ 重置对象</button>
+            </div>
+            <div class="tang_idcard">
+                <div class="tang_avatar"><i class="iconfont">&#xe620;</i></div>
+                <div class="tang_props" id="tang_obj_view"></div>
+            </div>
+            <div class="tang_obj_info" id="tang_obj_info"></div>
+        </div>
+
+        <!-- 一、认识对象 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe620;</i>一、认识对象：创建与访问</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe600;</i>
+                    <div>
+                        <div class="tang_method">对象字面量 <em class="tang_tag tang_tag_new">创建</em></div>
+                        <div class="tang_desc">用 { } 直接写出 键: 值，就是最常用创建方式。</div>
+                    </div>
+                </div>
+                <code class="tang_code">var obj = {
+  name: "小明",
+  age: 18,
+  hobby: "篮球"
+};</code>
+                <div class="tang_row"><span class="tang_out">↑ 上面这张档案卡就是用它创建的</span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">点表示法 <em class="tang_tag tang_tag_new">读取</em></div>
+                        <div class="tang_desc">用 对象.键 读取某个属性的值。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj.name</code>
+                <div class="tang_row"><button class="tang_btn" data-act="dot">运行</button><span class="tang_out" id="tang_out_dot"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">方括号表示法 <em class="tang_tag tang_tag_new">读取</em></div>
+                        <div class="tang_desc">用 对象["键"] 读取，键可以是变量或带连字符。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj["age"]</code>
+                <div class="tang_row"><button class="tang_btn" data-act="bracket">运行</button><span class="tang_out" id="tang_out_bracket"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe620;</i>
+                    <div>
+                        <div class="tang_method">属性是否存在 <em class="tang_tag tang_tag_new">判断</em></div>
+                        <div class="tang_desc">用 "键" in 对象 判断某个属性在不在。</div>
+                    </div>
+                </div>
+                <code class="tang_code">"city" in obj</code>
+                <div class="tang_row"><button class="tang_btn" data-act="has">运行</button><span class="tang_out" id="tang_out_has"></span></div>
+            </div>
+        </div>
+
+        <!-- 二、增删改 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe600;</i>二、增删改属性（改变原对象）</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xeaf9;</i>
+                    <div>
+                        <div class="tang_method">添加属性 <em class="tang_tag tang_tag_mut">改原对象</em></div>
+                        <div class="tang_desc">直接赋值就能新增一个字段（如 gender）。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj.gender = "男"</code>
+                <div class="tang_row"><button class="tang_btn" data-act="add">运行</button><span class="tang_out" id="tang_out_add"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe600;</i>
+                    <div>
+                        <div class="tang_method">修改属性 <em class="tang_tag tang_tag_mut">改原对象</em></div>
+                        <div class="tang_desc">给已有的键重新赋值即可覆盖。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj.age = 19</code>
+                <div class="tang_row"><button class="tang_btn" data-act="modify">运行</button><span class="tang_out" id="tang_out_modify"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe642;</i>
+                    <div>
+                        <div class="tang_method">删除属性 <em class="tang_tag tang_tag_mut">改原对象</em></div>
+                        <div class="tang_desc">用 delete 运算符删除某个字段。</div>
+                    </div>
+                </div>
+                <code class="tang_code">delete obj.hobby</code>
+                <div class="tang_row"><button class="tang_btn" data-act="del">运行</button><span class="tang_out" id="tang_out_del"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe708;</i>
+                    <div>
+                        <div class="tang_method">属性个数 <em class="tang_tag tang_tag_new">查看</em></div>
+                        <div class="tang_desc">Object.keys(obj).length 得到字段数量。</div>
+                    </div>
+                </div>
+                <code class="tang_code">Object.keys(obj).length</code>
+                <div class="tang_row"><button class="tang_btn" data-act="count">运行</button><span class="tang_out" id="tang_out_count"></span></div>
+            </div>
+        </div>
+
+        <!-- 三、方法与 this -->
+        <div class="tang_group_title"><i class="iconfont">&#xe891;</i>三、对象的方法与 this</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe891;</i>
+                    <div>
+                        <div class="tang_method">对象的方法 <em class="tang_tag tang_tag_new">函数属性</em></div>
+                        <div class="tang_desc">属性的值可以是一个函数，称为“方法”。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj.sayHi = function () {
+  return "你好，我是" + this.name;
+};</code>
+                <div class="tang_row"><span class="tang_out">方法调用见下方“this 关键字”</span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe61e;</i>
+                    <div>
+                        <div class="tang_method">this 关键字 <em class="tang_tag tang_tag_new">指向本身</em></div>
+                        <div class="tang_desc">方法里的 this 指向“调用它的那个对象”。</div>
+                    </div>
+                </div>
+                <code class="tang_code">obj.sayHi()  // this = obj</code>
+                <div class="tang_row"><button class="tang_btn" data-act="method">运行</button><span class="tang_out" id="tang_out_method"></span></div>
+            </div>
+        </div>
+
+        <!-- 四、遍历与批量操作 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe63e;</i>四、遍历与批量操作（不改变原对象）</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe63e;</i>
+                    <div>
+                        <div class="tang_method">for...in 遍历 <em class="tang_tag tang_tag_new">遍历键</em></div>
+                        <div class="tang_desc">依次拿到对象的所有键名。</div>
+                    </div>
+                </div>
+                <code class="tang_code">for (var k in obj) { ... }</code>
+                <div class="tang_row"><button class="tang_btn" data-act="forin">运行</button><span class="tang_out" id="tang_out_forin"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">Object.keys() <em class="tang_tag tang_tag_new">返回数组</em></div>
+                        <div class="tang_desc">取出所有键名组成一个数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">Object.keys(obj)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="keys">运行</button><span class="tang_out" id="tang_out_keys"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe6bb;</i>
+                    <div>
+                        <div class="tang_method">Object.values() <em class="tang_tag tang_tag_new">返回数组</em></div>
+                        <div class="tang_desc">取出所有值组成一个数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">Object.values(obj)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="values">运行</button><span class="tang_out" id="tang_out_values"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe708;</i>
+                    <div>
+                        <div class="tang_method">Object.entries() <em class="tang_tag tang_tag_new">返回键值对</em></div>
+                        <div class="tang_desc">取出 [键, 值] 组成的数组。</div>
+                    </div>
+                </div>
+                <code class="tang_code">Object.entries(obj)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="entries">运行</button><span class="tang_out" id="tang_out_entries"></span></div>
+            </div>
+        </div>
+
+        <!-- 五、序列化与嵌套 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe642;</i>五、序列化与嵌套对象</div>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe642;</i>
+                    <div>
+                        <div class="tang_method">JSON.stringify() <em class="tang_tag tang_tag_new">序列化成字符串</em></div>
+                        <div class="tang_desc">把对象转成 JSON 字符串，便于存储/传输。</div>
+                    </div>
+                </div>
+                <code class="tang_code">JSON.stringify(obj)</code>
+                <div class="tang_row"><button class="tang_btn" data-act="stringify">运行</button><span class="tang_out" id="tang_out_stringify"></span></div>
+            </div>
+
+            <div class="tang_card">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xeaf9;</i>
+                    <div>
+                        <div class="tang_method">JSON.parse() <em class="tang_tag tang_tag_new">解析成对象</em></div>
+                        <div class="tang_desc">把 JSON 字符串还原成对象。</div>
+                    </div>
+                </div>
+                <code class="tang_code">JSON.parse('{"x":1,"y":2}')</code>
+                <div class="tang_row"><button class="tang_btn" data-act="parse">运行</button><span class="tang_out" id="tang_out_parse"></span></div>
+            </div>
+
+            <div class="tang_card" style="grid-column: 1 / -1;">
+                <div class="tang_card_top">
+                    <i class="iconfont tang_mico">&#xe620;</i>
+                    <div>
+                        <div class="tang_method">嵌套对象 <em class="tang_tag tang_tag_new">对象里套对象</em></div>
+                        <div class="tang_desc">对象的值还可以是另一个对象，用 对象.键.子键 访问。</div>
+                    </div>
+                </div>
+                <code class="tang_code">var tang_stu = {
+  name: "小红",
+  addr: { province: "上海", district: "浦东" }
+};
+tang_stu.addr.district  // "浦东"</code>
+                <div class="tang_nested" id="tang_nested_view"></div>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        var tang_INITIAL = { name: "小明", age: 18, hobby: "篮球", city: "上海" };
+        var tang_obj = {};
+        var tang_colors = ["#e66a3d", "#215a70", "#3f8e8c", "#c9a227", "#8e6c9c", "#d1696e", "#2c8a6b", "#b5651d"];
+
+        function tang_format(v) {
+            if (typeof v === "string") return '"' + v + '"';
+            if (v === null) return "null";
+            if (v === undefined) return "undefined";
+            return String(v);
+        }
+
+        // 渲染主对象（档案卡）
+        function tang_render() {
+            var view = document.getElementById("tang_obj_view");
+            view.innerHTML = "";
+            var keys = Object.keys(tang_obj);
+            if (keys.length === 0) {
+                view.innerHTML = '<div class="tang_empty_obj">{ } 空对象</div>';
+            } else {
+                keys.forEach(function (k, i) {
+                    var row = document.createElement("div");
+                    row.className = "tang_prop";
+                    var val = document.createElement("span");
+                    val.className = "tang_val";
+                    val.style.background = tang_colors[i % tang_colors.length];
+                    val.textContent = tang_obj[k];
+                    row.innerHTML = '<span class="tang_key">' + k + '</span><span class="tang_colon">:</span>';
+                    row.appendChild(val);
+                    view.appendChild(row);
+                });
+            }
+            document.getElementById("tang_obj_info").textContent = "属性个数 = " + keys.length + "　（字段顺序即添加顺序）";
+        }
+
+        // 渲染一个数组（小色块）
+        function tang_setArr(id, label, arr) {
+            var el = document.getElementById(id);
+            el.innerHTML = "";
+            var lab = document.createElement("span");
+            lab.className = "tang_out_label";
+            lab.textContent = label;
+            el.appendChild(lab);
+            if (arr.length === 0) {
+                var e = document.createElement("span");
+                e.className = "tang_empty";
+                e.textContent = "[ 空 ]";
+                el.appendChild(e);
+                return;
+            }
+            arr.forEach(function (v, i) {
+                var c = document.createElement("span");
+                c.className = "tang_mini";
+                c.style.background = tang_colors[i % tang_colors.length];
+                c.textContent = tang_format(v);
+                el.appendChild(c);
+            });
+        }
+
+        // 渲染键值对
+        function tang_setPairs(id, label, entries) {
+            var el = document.getElementById(id);
+            el.innerHTML = "";
+            var lab = document.createElement("span");
+            lab.className = "tang_out_label";
+            lab.textContent = label;
+            el.appendChild(lab);
+            entries.forEach(function (pair) {
+                var p = document.createElement("span");
+                p.className = "tang_pair";
+                p.innerHTML = "[" + pair[0] + ", " + tang_format(pair[1]) + "]";
+                el.appendChild(p);
+            });
+        }
+
+        function tang_set(id, text) {
+            document.getElementById(id).textContent = text;
+        }
+
+        // 方法演示：this 指向调用对象
+        function tang_sayHi() {
+            return "你好，我是" + this.name + "，今年" + this.age + "岁";
+        }
+
+        // 嵌套对象静态示例
+        function tang_renderNested() {
+            var box = document.getElementById("tang_nested_view");
+            box.innerHTML = "";
+            var rows = [
+                ["name", "小红", 0],
+                ["addr", null, 1]
+            ];
+            var r1 = document.createElement("div");
+            r1.className = "tang_prop";
+            r1.innerHTML = '<span class="tang_key">name</span><span class="tang_colon">:</span>';
+            var v1 = document.createElement("span");
+            v1.className = "tang_val"; v1.style.background = tang_colors[0]; v1.textContent = "小红";
+            r1.appendChild(v1);
+            box.appendChild(r1);
+
+            var r2 = document.createElement("div");
+            r2.className = "tang_prop";
+            r2.innerHTML = '<span class="tang_key">addr</span><span class="tang_colon">:</span><span class="tang_val" style="background:' + tang_colors[1] + '">对象</span>';
+            box.appendChild(r2);
+
+            var sub = document.createElement("div");
+            sub.className = "tang_sub";
+            [["province", "上海", 2], ["district", "浦东", 3]].forEach(function (item) {
+                var sr = document.createElement("div");
+                sr.className = "tang_prop";
+                sr.innerHTML = '<span class="tang_key">' + item[0] + '</span><span class="tang_colon">:</span>';
+                var sv = document.createElement("span");
+                sv.className = "tang_val"; sv.style.background = tang_colors[item[2]]; sv.textContent = item[1];
+                sr.appendChild(sv);
+                sub.appendChild(sr);
+            });
+            box.appendChild(sub);
+        }
+
+        function tang_run(act) {
+            switch (act) {
+                case "dot":
+                    tang_set("tang_out_dot", "obj.name → " + tang_format(tang_obj.name));
+                    break;
+                case "bracket":
+                    tang_set("tang_out_bracket", 'obj["age"] → ' + tang_format(tang_obj.age));
+                    break;
+                case "has":
+                    tang_set("tang_out_has", '"city" in obj → ' + ("city" in tang_obj));
+                    break;
+                case "add":
+                    if (tang_obj.gender) {
+                        tang_obj.gender = (tang_obj.gender === "男" ? "女" : "男");
+                        tang_set("tang_out_add", "gender 已存在，改为 " + tang_obj.gender);
+                    } else {
+                        tang_obj.gender = "男";
+                        tang_set("tang_out_add", '新增属性 gender: "男"');
+                    }
+                    tang_render();
+                    break;
+                case "modify":
+                    tang_obj.age = 19;
+                    tang_render();
+                    tang_set("tang_out_modify", "age 改为 19");
+                    break;
+                case "del":
+                    if ("hobby" in tang_obj) {
+                        delete tang_obj.hobby;
+                        tang_render();
+                        tang_set("tang_out_del", "已删除 hobby");
+                    } else {
+                        tang_set("tang_out_del", "hobby 不存在，无法删除");
+                    }
+                    break;
+                case "count":
+                    tang_set("tang_out_count", "Object.keys(obj).length = " + Object.keys(tang_obj).length);
+                    break;
+                case "method":
+                    tang_set("tang_out_method", "obj.sayHi() → " + tang_sayHi.call(tang_obj));
+                    break;
+                case "forin":
+                    var ks = [];
+                    for (var k in tang_obj) { ks.push(k); }
+                    tang_set("tang_out_forin", "遍历得到的键：" + ks.join("、"));
+                    break;
+                case "keys":
+                    tang_setArr("tang_out_keys", "Object.keys(obj) →", Object.keys(tang_obj));
+                    break;
+                case "values":
+                    tang_setArr("tang_out_values", "Object.values(obj) →", Object.values(tang_obj));
+                    break;
+                case "entries":
+                    tang_setPairs("tang_out_entries", "Object.entries(obj) →", Object.entries(tang_obj));
+                    break;
+                case "stringify":
+                    document.getElementById("tang_out_stringify").innerHTML =
+                        '<span class="tang_out_label">JSON.stringify(obj) →</span><span class="tang_str">' + JSON.stringify(tang_obj) + '</span>';
+                    break;
+                case "parse":
+                    var p = JSON.parse('{"x":1,"y":2}');
+                    tang_set("tang_out_parse", 'JSON.parse(...) → x=' + p.x + "，y=" + p.y);
+                    break;
+            }
+        }
+
+        function tang_reset() {
+            tang_obj = {};
+            for (var k in tang_INITIAL) { tang_obj[k] = tang_INITIAL[k]; }
+            tang_render();
+        }
+
+        document.querySelectorAll(".tang_btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                tang_run(btn.getAttribute("data-act"));
+            });
+        });
+
+        document.getElementById("tang_btn_reset").addEventListener("click", tang_reset);
+
+        tang_reset();
+        tang_renderNested();
+    </script>
+</body>
+</html>
