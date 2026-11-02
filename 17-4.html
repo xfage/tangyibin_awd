@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-4 接口测试工具（fetch）</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-02 14:20，使用模型：Hy3，功能名称：接口测试工具，支持 GET/POST 等方法并显示返回数据与错误 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f4f7fa;
+            --card: #ffffff;
+            --line: #e1e7ee;
+            --blue: #215a70;
+            --orange: #e66a3d;
+            --green: #3f8e8c;
+            --purple: #8e6c9c;
+            --shadow: 0 14px 34px rgba(28, 39, 43, .08);
+            --jkey: #215a70;
+            --jstr: #2c8a6b;
+            --jnum: #e66a3d;
+            --jbool: #8e6c9c;
+            --jnull: #b5651d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh; color: var(--ink); background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .tang_head .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--orange), var(--blue));
+            box-shadow: var(--shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 26px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--orange); font-size: 14px; color: #2c3e46;
+        }
+        .tang_tip b { color: var(--orange); }
+        .tang_tip code { font-family: Consolas, monospace; background: #fbe3d8; padding: 1px 6px; border-radius: 5px; }
+
+        .tang_card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 20px;
+        }
+        .tang_group_title { font-size: 20px; margin: 26px 0 14px; display: flex; align-items: center; gap: 8px; }
+        .tang_group_title i { color: var(--orange); }
+
+        .tang_reqrow { display: flex; gap: 12px; flex-wrap: wrap; align-items: stretch; }
+        .tang_method {
+            padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+            font-family: Consolas, monospace; font-weight: 700; color: var(--blue); font-size: 15px;
+        }
+        .tang_url {
+            flex: 1 1 320px; padding: 11px 14px; border: 1px solid var(--line); border-radius: 8px;
+            font-family: Consolas, monospace; font-size: 14px; background: #fbfdfe;
+        }
+        .tang_url:focus, .tang_method:focus, .tang_body:focus, .tang_headers:focus { outline: none; border-color: var(--orange); }
+        .tang_btn {
+            background: var(--orange); color: #fff; border: none; border-radius: 8px;
+            padding: 11px 24px; font-family: inherit; font-size: 15px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn:disabled { opacity: .55; cursor: not-allowed; }
+        .tang_btn_ghost { background: #fff; color: var(--orange); border: 1px solid var(--orange); }
+        .tang_btn_ghost:hover { background: #fdeee7; }
+
+        .tang_field_label { font-size: 13px; color: var(--muted); margin: 16px 0 6px; display: flex; align-items: center; gap: 8px; }
+        .tang_field_label i { color: var(--orange); }
+        .tang_body, .tang_headers {
+            width: 100%; min-height: 96px; border: 1px solid var(--line); border-radius: 10px;
+            padding: 12px 14px; font-family: Consolas, monospace; font-size: 13px; line-height: 1.6;
+            resize: vertical; background: #fbfdfe; color: var(--ink);
+        }
+        .tang_headers { min-height: 60px; }
+        .tang_disabled { opacity: .45; pointer-events: none; }
+
+        /* 状态栏 */
+        .tang_statusbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+        .tang_badge { font-size: 14px; font-weight: 700; padding: 5px 14px; border-radius: 20px; font-family: Consolas, monospace; }
+        .tang_badge_idle { background: #eef3f7; color: var(--muted); }
+        .tang_badge_2 { background: #e3f3ed; color: var(--green); }
+        .tang_badge_4 { background: #fbe3df; color: #c0392b; }
+        .tang_badge_5 { background: #fbe3df; color: #c0392b; }
+        .tang_badge_net { background: #fbe3df; color: #c0392b; }
+        .tang_meta { color: var(--muted); font-size: 13px; font-family: Consolas, monospace; }
+
+        .tang_code {
+            display: block; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+            background: #2d2d2d; color: #f8f8f2; padding: 14px 16px; border-radius: 10px;
+            margin: 0; white-space: pre; overflow-x: auto; line-height: 1.6; min-height: 120px;
+        }
+        .tang_jkey { color: var(--jkey); }
+        .tang_jstr { color: var(--jstr); }
+        .tang_jbool { color: var(--jbool); }
+        .tang_jnull { color: var(--jnull); }
+        .tang_jnum { color: var(--jnum); }
+
+        .tang_err {
+            background: #fbe3df; border: 1px solid #f1b8ac; color: #c0392b; border-radius: 10px;
+            padding: 12px 14px; font-size: 14px; margin-bottom: 14px; font-family: Consolas, monospace;
+        }
+        .tang_err b { display: block; margin-bottom: 4px; font-family: inherit; }
+        .tang_placeholder { color: var(--muted); }
+
+        .tang_presets { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+        .tang_preset {
+            border: 1px dashed var(--line); background: #fbfdfe; color: var(--blue); border-radius: 8px;
+            padding: 7px 14px; font-size: 13px; cursor: pointer; font-family: Consolas, monospace;
+        }
+        .tang_preset:hover { border-color: var(--orange); color: var(--orange); }
+
+        .tang_back { display: inline-block; margin-top: 10px; color: var(--orange); text-decoration: none; font-size: 15px; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+        @media (max-width: 820px) { .tang_shell { width: calc(100% - 28px); } }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe6bb;</i></div>
+            <div>
+                <h1>接口测试工具</h1>
+                <p>用原生 <code style="font-family:Consolas,monospace">fetch()</code> 发送 GET / POST / PUT / PATCH / DELETE 请求并查看结果</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>怎么玩：</b>选择<b>请求方法</b>、填写<b>接口地址</b>，需要带数据时在<b>请求体</b>里写 JSON（POST / PUT / PATCH 常用）。
+            点 <b>发送请求</b> 后，下方会显示 <b>状态码</b>、<b>耗时</b>、<b>返回数据</b>（自动格式化高亮）；
+            若网络出错或服务器报错，会显示醒目的 <b>错误提示</b>。下方还提供几个示例一键填入。
+        </div>
+
+        <!-- 请求区 -->
+        <div class="tang_card">
+            <div class="tang_reqrow">
+                <select class="tang_method" id="tang_method">
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="PATCH">PATCH</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <input class="tang_url" id="tang_url" value="https://jsonplaceholder.typicode.com/posts" spellcheck="false">
+                <button class="tang_btn" id="tang_btn_send" type="button"><i class="iconfont">&#xe751;</i>发送请求</button>
+            </div>
+
+            <div class="tang_field_label"><i class="iconfont">&#xe708;</i>请求头 Headers（每行一个，key: value，可选）</div>
+            <textarea class="tang_headers" id="tang_headers" spellcheck="false" placeholder="Content-Type: application/json"></textarea>
+
+            <div id="tang_body_wrap">
+                <div class="tang_field_label"><i class="iconfont">&#xe600;</i>请求体 Body（POST / PUT / PATCH 使用，JSON 格式）</div>
+                <textarea class="tang_body" id="tang_body" spellcheck="false" placeholder='{
+  "title": "foo",
+  "body": "bar",
+  "userId": 1
+}'></textarea>
+            </div>
+
+            <div class="tang_presets">
+                <span class="tang_preset" data-preset="get">示例：GET 列表</span>
+                <span class="tang_preset" data-preset="post">示例：POST 新建</span>
+                <span class="tang_preset" data-preset="put">示例：PUT 更新</span>
+                <span class="tang_preset" data-preset="del">示例：DELETE 删除</span>
+            </div>
+        </div>
+
+        <!-- 响应区 -->
+        <div class="tang_group_title"><i class="iconfont">&#xe642;</i>响应结果</div>
+        <div class="tang_card">
+            <div class="tang_statusbar">
+                <span class="tang_badge tang_badge_idle" id="tang_badge">待发送</span>
+                <span class="tang_meta" id="tang_time"></span>
+            </div>
+            <div id="tang_error" style="display:none;"></div>
+            <div class="tang_field_label"><i class="iconfont">&#xeaf9;</i>返回数据（Response Body，已格式化 / 语法高亮）</div>
+            <pre class="tang_code" id="tang_body_out"><span class="tang_placeholder">// 点击「发送请求」后，这里显示接口返回的数据</span></pre>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        var tang_method = document.getElementById("tang_method");
+        var tang_url = document.getElementById("tang_url");
+        var tang_headers = document.getElementById("tang_headers");
+        var tang_body = document.getElementById("tang_body");
+        var tang_btn = document.getElementById("tang_btn_send");
+        var tang_badge = document.getElementById("tang_badge");
+        var tang_time = document.getElementById("tang_time");
+        var tang_error = document.getElementById("tang_error");
+        var tang_body_out = document.getElementById("tang_body_out");
+
+        var tang_NEED_BODY = { POST: 1, PUT: 1, PATCH: 1 };
+
+        // JSON 语法高亮
+        function tang_syntaxHighlight(json) {
+            if (typeof json !== "string") json = JSON.stringify(json, null, 2);
+            json = json.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return json.replace(
+                /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false)\b|\bnull\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+                function (match) {
+                    var cls = "tang_jnum";
+                    if (/^"/.test(match)) {
+                        cls = /:$/.test(match) ? "tang_jkey" : "tang_jstr";
+                    } else if (/true|false/.test(match)) {
+                        cls = "tang_jbool";
+                    } else if (/null/.test(match)) {
+                        cls = "tang_jnull";
+                    }
+                    return '<span class="' + cls + '">' + match + "</span>";
+                }
+            );
+        }
+
+        function tang_escape(s) {
+            return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function tang_setBadge(text, cls) {
+            tang_badge.className = "tang_badge " + cls;
+            tang_badge.textContent = text;
+        }
+
+        // 解析自定义请求头
+        function tang_parseHeaders(raw) {
+            var map = {};
+            raw.split(/\n/).forEach(function (line) {
+                var i = line.indexOf(":");
+                if (i > 0) {
+                    var k = line.slice(0, i).trim();
+                    var v = line.slice(i + 1).trim();
+                    if (k) map[k] = v;
+                }
+            });
+            return map;
+        }
+
+        // 根据方法启用 / 禁用请求体
+        function tang_syncBody() {
+            var wrap = document.getElementById("tang_body_wrap");
+            if (tang_NEED_BODY[tang_method.value]) {
+                wrap.classList.remove("tang_disabled");
+            } else {
+                wrap.classList.add("tang_disabled");
+            }
+        }
+
+        function tang_send() {
+            var url = tang_url.value.trim();
+            if (!url) {
+                tang_showError("缺少接口地址", "请填写要请求的 URL。");
+                return;
+            }
+            var method = tang_method.value;
+            var hasBody = !!tang_NEED_BODY[method];
+            var bodyText = tang_body.value.trim();
+
+            var init = { method: method, headers: tang_parseHeaders(tang_headers.value) };
+
+            if (hasBody) {
+                if (bodyText) {
+                    init.headers["Content-Type"] = init.headers["Content-Type"] || "application/json";
+                    init.body = bodyText;
+                }
+            }
+
+            tang_btn.disabled = true;
+            tang_setBadge("请求中…", "tang_badge_idle");
+            tang_time.textContent = "发送中…";
+            tang_error.style.display = "none";
+            tang_body_out.innerHTML = '<span class="tang_placeholder">// 等待响应…</span>';
+
+            var start = performance.now();
+
+            fetch(url, init)
+                .then(function (res) {
+                    var ms = Math.round(performance.now() - start);
+                    var cls = res.ok ? "tang_badge_2" : (String(res.status)[0] === "4" ? "tang_badge_4" : "tang_badge_5");
+                    tang_setBadge(res.status + " " + res.statusText, cls);
+                    tang_time.textContent = "耗时 " + ms + " ms　·　类型 " + (res.headers.get("content-type") || "未知");
+                    return res.text().then(function (txt) {
+                        try {
+                            tang_body_out.innerHTML = tang_syntaxHighlight(JSON.parse(txt));
+                        } catch (e) {
+                            tang_body_out.textContent = txt || "(空响应体)";
+                        }
+                    });
+                })
+                .catch(function (err) {
+                    var ms = Math.round(performance.now() - start);
+                    tang_setBadge("网络错误", "tang_badge_net");
+                    tang_time.textContent = "耗时 " + ms + " ms";
+                    tang_body_out.innerHTML = '<span class="tang_placeholder">// 无返回数据</span>';
+                    tang_showError("请求失败（网络 / 跨域 / 地址错误）", err.message);
+                })
+                .finally(function () { tang_btn.disabled = false; });
+        }
+
+        function tang_showError(title, msg) {
+            tang_error.style.display = "block";
+            tang_error.innerHTML = "<b>⚠ " + tang_escape(title) + "</b>" + tang_escape(msg);
+        }
+
+        // 示例一键填入
+        var tang_PRESETS = {
+            get: { method: "GET", url: "https://jsonplaceholder.typicode.com/posts/1", headers: "", body: "" },
+            post: { method: "POST", url: "https://jsonplaceholder.typicode.com/posts", headers: "Content-Type: application/json", body: '{\n  "title": "foo",\n  "body": "bar",\n  "userId": 1\n}' },
+            put: { method: "PUT", url: "https://jsonplaceholder.typicode.com/posts/1", headers: "Content-Type: application/json", body: '{\n  "id": 1,\n  "title": "updated",\n  "body": "baz",\n  "userId": 1\n}' },
+            del: { method: "DELETE", url: "https://jsonplaceholder.typicode.com/posts/1", headers: "", body: "" }
+        };
+
+        document.querySelectorAll(".tang_preset").forEach(function (el) {
+            el.addEventListener("click", function () {
+                var p = tang_PRESETS[el.getAttribute("data-preset")];
+                if (!p) return;
+                tang_method.value = p.method;
+                tang_url.value = p.url;
+                tang_headers.value = p.headers;
+                tang_body.value = p.body;
+                tang_syncBody();
+            });
+        });
+
+        tang_method.addEventListener("change", tang_syncBody);
+        tang_btn.addEventListener("click", tang_send);
+        tang_syncBody();
+    </script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-6 Promise 与 async/await 异步演示</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-02 16:00，使用模型：Hy3，功能名称：用 Promise 与 async/await 演示包饺子异步流程 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f4f7fa;
+            --card: #ffffff;
+            --line: #e1e7ee;
+            --blue: #215a70;
+            --orange: #e66a3d;
+            --green: #3f8e8c;
+            --purple: #8e6c9c;
+            --shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh; color: var(--ink); background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .tang_head .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--orange), var(--blue));
+            box-shadow: var(--shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 26px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--orange); font-size: 14px; color: #2c3e46;
+        }
+        .tang_tip b { color: var(--orange); }
+        .tang_tip code { font-family: Consolas, monospace; background: #fbe3d8; padding: 1px 6px; border-radius: 5px; }
+
+        .tang_toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 18px; }
+        .tang_btn {
+            background: var(--orange); color: #fff; border: none; border-radius: 8px;
+            padding: 10px 22px; font-family: inherit; font-size: 15px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn:disabled { opacity: .55; cursor: not-allowed; }
+        .tang_btn_ghost { background: #fff; color: var(--orange); border: 1px solid var(--orange); }
+        .tang_btn_ghost:hover { background: #fdeee7; }
+
+        .tang_progress_wrap { flex: 1 1 240px; display: flex; align-items: center; gap: 10px; }
+        .tang_progress { flex: 1; height: 10px; background: #e6ecf1; border-radius: 20px; overflow: hidden; }
+        .tang_progress > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--orange), var(--green)); transition: width .3s ease; }
+        .tang_pct { font-size: 13px; color: var(--muted); font-family: Consolas, monospace; min-width: 38px; text-align: right; }
+
+        .tang_grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+        .tang_card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); padding: 20px 22px;
+        }
+        .tang_card_title { font-size: 17px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+        .tang_card_title i { color: var(--orange); }
+
+        /* 步骤列表 */
+        .tang_steps { list-style: none; position: relative; padding-left: 8px; }
+        .tang_steps::before {
+            content: ""; position: absolute; left: 19px; top: 14px; bottom: 14px; width: 2px; background: var(--line);
+        }
+        .tang_step { display: flex; align-items: center; gap: 14px; padding: 9px 0; position: relative; }
+        .tang_dot {
+            flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 2px solid var(--line);
+            display: grid; place-items: center; font-size: 13px; color: var(--muted); z-index: 1;
+        }
+        .tang_step.run .tang_dot { border-color: var(--orange); color: var(--orange); animation: tang_spin 1s infinite linear; }
+        .tang_step.done .tang_dot { background: var(--green); border-color: var(--green); color: #fff; }
+        @keyframes tang_spin { to { transform: rotate(360deg); } }
+        .tang_step_name { flex: 1; font-size: 15px; }
+        .tang_step.done .tang_step_name { color: var(--green); font-weight: 700; }
+        .tang_step.run .tang_step_name { color: var(--orange); font-weight: 700; }
+        .tang_sbadge { font-size: 12px; padding: 3px 11px; border-radius: 20px; font-weight: 700; }
+        .tang_s_wait { background: #eef2f6; color: var(--muted); }
+        .tang_s_run { background: #fff3d6; color: #b5651d; }
+        .tang_s_done { background: #e3f3ed; color: var(--green); }
+        .tang_para { font-size: 12px; color: var(--purple); margin-left: 38px; margin-top: -4px; }
+
+        /* 日志 */
+        .tang_log {
+            height: 320px; overflow-y: auto; background: #2d2d2d; color: #f3f3f3; border-radius: 10px;
+            padding: 14px 16px; font-family: Consolas, monospace; font-size: 13px; line-height: 1.9;
+        }
+        .tang_log .tang_t { color: #7f9c9a; margin-right: 8px; }
+        .tang_log .tang_ok { color: #7fd1a8; }
+        .tang_log .tang_go { color: #f0b35e; }
+
+        .tang_code {
+            display: block; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+            background: #2d2d2d; color: #f8f8f2; padding: 12px 14px; border-radius: 10px;
+            margin: 12px 0 0; white-space: pre; overflow-x: auto; line-height: 1.6;
+        }
+
+        .tang_back { display: inline-block; margin-top: 40px; color: var(--orange); text-decoration: none; font-size: 15px; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+        @media (max-width: 820px) { .tang_grid { grid-template-columns: 1fr; } .tang_shell { width: calc(100% - 28px); } }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe600;</i></div>
+            <div>
+                <h1>Promise 与 async/await 异步演示</h1>
+                <p>用「包饺子」的流程，演示 Promise、async/await 串行，以及 Promise.all 并行</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>流程：</b>先 <b>买原料</b>（6 秒）→ <b>取原料</b> → 之后 <b>和面</b> 与 <b>和馅</b> 两个任务<b>同时进行</b>（Promise.all）→
+            两者都完成后 <b>包饺子</b> → 最后 <b>吃饺子</b>。每个环节用 <code>setTimeout</code> 模拟耗时，
+            用 <code>await</code> 等待，`<code>Promise.all</code>` 等待并行任务。
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_start" type="button"><i class="iconfont">&#xe751;</i>开始包饺子</button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_reset" type="button"><i class="iconfont">&#xe64c;</i>重置</button>
+            <div class="tang_progress_wrap">
+                <div class="tang_progress"><i id="tang_bar"></i></div>
+                <span class="tang_pct" id="tang_pct">0%</span>
+            </div>
+        </div>
+
+        <div class="tang_grid">
+            <!-- 步骤 -->
+            <div class="tang_card">
+                <div class="tang_card_title"><i class="iconfont">&#xe708;</i>包饺子流程</div>
+                <ul class="tang_steps" id="tang_steps">
+                    <li class="tang_step" data-name="买原料"><span class="tang_dot">1</span><span class="tang_step_name">买原料（约 6 秒）</span><span class="tang_sbadge tang_s_wait" id="tang_st_买原料">等待</span></li>
+                    <li class="tang_step" data-name="取原料"><span class="tang_dot">2</span><span class="tang_step_name">取原料</span><span class="tang_sbadge tang_s_wait" id="tang_st_取原料">等待</span></li>
+                    <li class="tang_step" data-name="和面"><span class="tang_dot">3</span><span class="tang_step_name">和面</span><span class="tang_sbadge tang_s_wait" id="tang_st_和面">等待</span></li>
+                    <li class="tang_step" data-name="和馅"><span class="tang_dot">4</span><span class="tang_step_name">和馅</span><span class="tang_sbadge tang_s_wait" id="tang_st_和馅">等待</span></li>
+                    <li class="tang_step" data-name="包饺子"><span class="tang_dot">5</span><span class="tang_step_name">包饺子</span><span class="tang_sbadge tang_s_wait" id="tang_st_包饺子">等待</span></li>
+                    <li class="tang_step" data-name="吃饺子"><span class="tang_dot">6</span><span class="tang_step_name">吃饺子</span><span class="tang_sbadge tang_s_wait" id="tang_st_吃饺子">等待</span></li>
+                </ul>
+                <p class="tang_para">↑ 第 3、4 步并行：和面与和馅同时开工，都完成才进入包饺子。</p>
+            </div>
+
+            <!-- 日志 -->
+            <div class="tang_card">
+                <div class="tang_card_title"><i class="iconfont">&#xe6bb;</i>运行日志</div>
+                <div class="tang_log" id="tang_log"><span style="color:#7f9c9a;">// 点击「开始包饺子」查看每一步的异步执行过程…</span></div>
+            </div>
+        </div>
+
+        <div class="tang_card" style="margin-top:18px;">
+            <div class="tang_card_title"><i class="iconfont">&#xe642;</i>核心代码（async / await + Promise.all）</div>
+            <code class="tang_code">async function tang_make() {
+  await tang_do("买原料", 6000);          // 串行：先买
+  await tang_do("取原料", 2000);          // 串行：再取
+  // 并行：和面 + 和馅 同时进行
+  await Promise.all([
+    tang_step(3000),   // 和面
+    tang_step(3000)    // 和馅
+  ]);
+  await tang_do("包饺子", 4000);          // 两者都完成才包
+  await tang_do("吃饺子", 2000);          // 最后吃
+}</code>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        var tang_STEPS = ["买原料", "取原料", "和面", "和馅", "包饺子", "吃饺子"];
+        var tang_done = 0;
+        var tang_btn = document.getElementById("tang_btn_start");
+        var tang_btn_reset = document.getElementById("tang_btn_reset");
+        var tang_log = document.getElementById("tang_log");
+        var tang_bar = document.getElementById("tang_bar");
+        var tang_pct = document.getElementById("tang_pct");
+
+        function tang_now() {
+            var t = new Date();
+            function p(n) { return n < 10 ? "0" + n : "" + n; }
+            return p(t.getHours()) + ":" + p(t.getMinutes()) + ":" + p(t.getSeconds());
+        }
+
+        function tang_setStatus(name, state) {
+            var el = document.getElementById("tang_st_" + name);
+            if (!el) return;
+            el.className = "tang_sbadge tang_s_" + state;
+            el.textContent = state === "wait" ? "等待" : (state === "run" ? "进行中" : "完成");
+            var li = el.closest(".tang_step");
+            li.className = "tang_step" + (state === "run" ? " run" : (state === "done" ? " done" : ""));
+        }
+
+        function tang_logLine(msg, cls) {
+            var line = document.createElement("div");
+            line.innerHTML = '<span class="tang_t">' + tang_now() + '</span><span class="' + (cls || "") + '">' + msg + '</span>';
+            tang_log.appendChild(line);
+            tang_log.scrollTop = tang_log.scrollHeight;
+        }
+
+        function tang_progress() {
+            tang_done++;
+            var pct = Math.round(tang_done / tang_STEPS.length * 100);
+            tang_bar.style.width = pct + "%";
+            tang_pct.textContent = pct + "%";
+        }
+
+        // 用 setTimeout 把耗时包装成一个 Promise
+        function tang_step(ms) {
+            return new Promise(function (resolve) { setTimeout(resolve, ms); });
+        }
+
+        // 串行执行单步：开始 → 等待 → 完成
+        async function tang_do(name, ms) {
+            tang_setStatus(name, "run");
+            tang_logLine("▶ 开始：" + name + "（约 " + (ms / 1000) + " 秒）", "tang_go");
+            await tang_step(ms);
+            tang_setStatus(name, "done");
+            tang_logLine("✔ 完成：" + name, "tang_ok");
+            tang_progress();
+        }
+
+        async function tang_make() {
+            tang_logLine("🥟 开始包饺子流程！", "tang_go");
+            await tang_do("买原料", 6000);
+            await tang_do("取原料", 2000);
+
+            tang_logLine("买完原料，开始同时 和面 与 和馅 …", "tang_go");
+            tang_setStatus("和面", "run");
+            tang_setStatus("和馅", "run");
+            await Promise.all([tang_step(3000), tang_step(3000)]);   // 并行
+            tang_setStatus("和面", "done");
+            tang_setStatus("和馅", "done");
+            tang_logLine("✔ 完成：和面、和馅（并行结束）", "tang_ok");
+            tang_progress();
+            tang_progress();
+
+            await tang_do("包饺子", 4000);
+            await tang_do("吃饺子", 2000);
+            tang_logLine("🎉 饺子吃完啦，流程全部结束！", "tang_ok");
+        }
+
+        function tang_reset() {
+            tang_done = 0;
+            tang_bar.style.width = "0%";
+            tang_pct.textContent = "0%";
+            tang_log.innerHTML = '<span style="color:#7f9c9a;">// 点击「开始包饺子」查看每一步的异步执行过程…</span>';
+            tang_STEPS.forEach(function (n) { tang_setStatus(n, "wait"); });
+        }
+
+        document.getElementById("tang_btn_start").addEventListener("click", function () {
+            tang_btn.disabled = true;
+            tang_btn_reset.disabled = true;
+            tang_make().then(function () {
+                tang_btn.disabled = false;
+                tang_btn_reset.disabled = false;
+            });
+        });
+        tang_btn_reset.addEventListener("click", tang_reset);
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17-3 商品列表（fetch）</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-02 13:10，使用模型：Hy3，功能名称：fetch 获取商品列表并展示 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --ink: #17232b;
+            --muted: #617078;
+            --paper: #f4f7fa;
+            --card: #ffffff;
+            --line: #e1e7ee;
+            --blue: #215a70;
+            --orange: #e66a3d;
+            --green: #3f8e8c;
+            --purple: #8e6c9c;
+            --shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh; color: var(--ink); background: var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; }
+        .tang_head .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--orange), var(--blue));
+            box-shadow: var(--shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 26px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--orange); font-size: 14px; color: #2c3e46;
+        }
+        .tang_tip b { color: var(--orange); }
+        .tang_tip code { font-family: Consolas, monospace; background: #fbe3d8; padding: 1px 6px; border-radius: 5px; }
+
+        .tang_toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+        .tang_btn {
+            background: var(--orange); color: #fff; border: none; border-radius: 8px;
+            padding: 10px 22px; font-family: inherit; font-size: 15px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn:disabled { opacity: .55; cursor: not-allowed; }
+        .tang_status { font-size: 14px; font-weight: 700; padding: 4px 12px; border-radius: 20px; }
+        .tang_status_idle { background: #eef3f7; color: var(--muted); }
+        .tang_status_loading { background: #fff3d6; color: #b5651d; }
+        .tang_status_ok { background: #e3f3ed; color: var(--green); }
+        .tang_status_err { background: #fbe3df; color: #c0392b; }
+
+        .tang_grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .tang_card {
+            display: block; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+            box-shadow: var(--shadow); overflow: hidden; text-decoration: none; color: inherit;
+            transition: transform .2s ease, border-color .2s ease;
+        }
+        .tang_card:hover { transform: translateY(-5px); border-color: var(--orange); }
+        .tang_thumb {
+            width: 100%; aspect-ratio: 1 / 1; background: linear-gradient(135deg, #eef3f7, #f7f4fb);
+            display: grid; place-items: center; overflow: hidden;
+        }
+        .tang_thumb img { width: 100%; height: 100%; object-fit: contain; }
+        .tang_body { padding: 14px 15px 16px; }
+        .tang_cat { font-size: 11px; color: var(--orange); font-weight: 700; letter-spacing: .5px; }
+        .tang_title { font-size: 15px; font-weight: 700; margin: 4px 0 10px; line-height: 1.4; height: 2.8em; overflow: hidden; }
+        .tang_meta { display: flex; align-items: center; justify-content: space-between; }
+        .tang_price { color: var(--orange); font-weight: 700; font-size: 17px; }
+        .tang_rating { color: var(--muted); font-size: 13px; display: inline-flex; align-items: center; gap: 4px; }
+        .tang_rating i { color: #e6a23c; }
+        .tang_empty, .tang_err { grid-column: 1 / -1; color: var(--muted); padding: 40px 0; text-align: center; }
+
+        .tang_back { display: inline-block; margin-top: 40px; color: var(--orange); text-decoration: none; font-size: 15px; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 22px; color: var(--muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px) { .tang_grid { grid-template-columns: 1fr; } .tang_shell { width: calc(100% - 28px); } }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe604;</i></div>
+            <div>
+                <h1>商品列表</h1>
+                <p>用原生 <code style="font-family:Consolas,monospace">fetch()</code> 从接口拉取商品数据并渲染卡片</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>怎么玩：</b>页面加载即向 <code>https://dummyjson.com/products?limit=8</code> 发请求，
+            拿到 8 件商品后渲染成卡片。点击任意卡片进入 <b>17-3-detail.html</b> 查看该商品详情（按 id 取数）。
+            点 <b>重新加载</b> 可再次请求。
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_reload" type="button"><i class="iconfont">&#xe6bb;</i>重新加载</button>
+            <span class="tang_status tang_status_idle" id="tang_status">未请求</span>
+        </div>
+
+        <div class="tang_grid" id="tang_grid">
+            <div class="tang_empty">加载中…</div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+        var tang_API = "https://dummyjson.com/products?limit=8";
+        var tang_grid = document.getElementById("tang_grid");
+        var tang_status = document.getElementById("tang_status");
+        var tang_btn = document.getElementById("tang_btn_reload");
+
+        function tang_setStatus(text, cls) {
+            tang_status.className = "tang_status " + cls;
+            tang_status.textContent = text;
+        }
+
+        function tang_escape(s) {
+            return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function tang_render(list) {
+            tang_grid.innerHTML = "";
+            if (!list.length) {
+                tang_grid.innerHTML = '<div class="tang_empty">接口未返回商品</div>';
+                return;
+            }
+            list.forEach(function (p) {
+                var card = document.createElement("a");
+                card.className = "tang_card";
+                card.href = "17-3-detail.html?id=" + encodeURIComponent(p.id);
+                var rating = (typeof p.rating === "number") ? p.rating.toFixed(1) : p.rating;
+                card.innerHTML =
+                    '<div class="tang_thumb"><img src="' + tang_escape(p.thumbnail) + '" alt="' + tang_escape(p.title) + '" loading="lazy"></div>' +
+                    '<div class="tang_body">' +
+                        '<div class="tang_cat">' + tang_escape(p.category || "") + '</div>' +
+                        '<div class="tang_title">' + tang_escape(p.title) + '</div>' +
+                        '<div class="tang_meta">' +
+                            '<span class="tang_price">$' + tang_escape(p.price) + '</span>' +
+                            '<span class="tang_rating"><i class="iconfont">&#xe8c3;</i>' + tang_escape(rating) + '</span>' +
+                        '</div>' +
+                    '</div>';
+                tang_grid.appendChild(card);
+            });
+        }
+
+        function tang_load() {
+            tang_btn.disabled = true;
+            tang_setStatus("请求中…", "tang_status_loading");
+            tang_grid.innerHTML = '<div class="tang_empty">加载中…</div>';
+
+            fetch(tang_API)
+                .then(function (res) {
+                    if (!res.ok) throw new Error("HTTP 状态：" + res.status);
+                    return res.json();
+                })
+                .then(function (data) {
+                    tang_render(data.products || []);
+                    tang_setStatus("✓ 成功加载 " + (data.products ? data.products.length : 0) + " 件商品", "tang_status_ok");
+                    tang_btn.disabled = false;
+                })
+                .catch(function (err) {
+                    tang_setStatus("✗ 请求失败", "tang_status_err");
+                    tang_grid.innerHTML = '<div class="tang_err">出错了：' + tang_escape(err.message) + '</div>';
+                    tang_btn.disabled = false;
+                });
+        }
+
+        tang_btn.addEventListener("click", tang_load);
+        tang_load();
+    </script>
+</body>
+</html>
