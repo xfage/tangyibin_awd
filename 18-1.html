@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-1 Canvas 粒子文字动画｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 13:33，使用模型：DeepSeek-V4.1-Flash，功能名称：Canvas 粒子文字动画，粒子聚合成「唐翊斌」 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 22px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .tang_stage {
+            position: relative; height: clamp(340px, 46vw, 540px); overflow: hidden;
+            border: 1px solid #0d2a33; border-radius: 16px; background: #08161c;
+            box-shadow: 0 26px 56px rgba(10, 26, 32, .26);
+        }
+        .tang_canvas { display: block; width: 100%; height: 100%; cursor: crosshair; touch-action: none; }
+        .tang_hud {
+            position: absolute; pointer-events: none; font-size: 11px; letter-spacing: 1px;
+            font-family: Consolas, "Courier New", monospace; color: rgba(190, 225, 225, .5);
+        }
+        .tang_hud b { color: #ffd166; font-weight: 400; }
+        .tang_hud_tl { top: 16px; left: 18px; }
+        .tang_hud_tr { top: 16px; right: 18px; }
+        .tang_hud_bl { bottom: 16px; left: 18px; }
+        .tang_hint {
+            position: absolute; right: 18px; bottom: 16px; pointer-events: none;
+            font-size: 12px; color: rgba(190, 225, 225, .38);
+        }
+
+        .tang_toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 26px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border: 1px solid transparent; border-radius: 8px; background: var(--tang_orange);
+            color: #fff; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn_ghost { background: #fff; color: var(--tang_blue); border-color: var(--tang_line); }
+        .tang_btn_ghost:hover { background: #eef3f6; }
+        .tang_note { margin-left: auto; color: var(--tang_muted); font-size: 13px; }
+
+        .tang_grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tang_card {
+            padding: 20px 22px; border: 1px solid var(--tang_line); border-radius: 14px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 16px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_card p { color: var(--tang_muted); font-size: 13px; }
+        .tang_card p code {
+            padding: 1px 5px; border-radius: 4px; background: #f1f5f8;
+            font-family: Consolas, "Courier New", monospace; font-size: 12px; color: var(--tang_blue);
+        }
+        .tang_card_wide { grid-column: 1 / -1; }
+        .tang_code {
+            display: block; margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 34px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: 1fr; } }
+        @media (max-width: 600px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 22px; }
+            .tang_note { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe63b;</i></div>
+            <div>
+                <h1>Canvas 粒子文字动画</h1>
+                <p>把「唐翊斌」三个字拆成像素点，再用粒子重新聚合成字</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>原理：</b>先在离屏 canvas 上绘制文字，用 <code>getImageData()</code> 按步长采样笔画像素，
+            每个采样点生成一个粒子；粒子在弹簧模型下回到目标点，鼠标靠近时被推开，点击画布则爆散重聚。
+        </div>
+
+        <div class="tang_stage" id="tang_stage">
+            <canvas class="tang_canvas" id="tang_canvas"></canvas>
+            <div class="tang_hud tang_hud_tl">PARTICLES <b id="tang_count">0</b></div>
+            <div class="tang_hud tang_hud_tr">FPS <b id="tang_fps">--</b></div>
+            <div class="tang_hud tang_hud_bl">PALETTE <b id="tang_pal">橙青</b></div>
+            <div class="tang_hint">移动鼠标推开粒子 · 点击画面爆散重聚</div>
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_pause" type="button">
+                <i class="iconfont">&#xe63b;</i><span id="tang_pause_text">暂停动画</span>
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_shuffle" type="button">
+                <i class="iconfont">&#xe6bb;</i>重排粒子
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_color" type="button">
+                <i class="iconfont">&#xe600;</i>切换配色
+            </button>
+            <span class="tang_note">Canvas 2D + requestAnimationFrame · 无第三方库</span>
+        </div>
+
+        <div class="tang_grid">
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63e;</i>文字 → 像素点</h3>
+                <p>用离屏 canvas 居中绘制「唐翊斌」，再读取 ImageData，每隔 2–4 个像素取一个不透明的点，得到数千个笔画坐标。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63b;</i>弹簧模型</h3>
+                <p>粒子记录当前位置与目标位置，速度按 <code>v = (v + 偏移 × 0.03) × 0.9</code> 迭代，形成回弹；鼠标半径内的粒子受到斥力。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe6bb;</i>逐帧绘制</h3>
+                <p>requestAnimationFrame 每帧清屏重绘背景、光晕、粒子与尾迹，并按帧间隔缩放速度，高刷新率屏幕也不会加速。</p>
+            </div>
+            <div class="tang_card tang_card_wide">
+                <h3><i class="iconfont">&#xe600;</i>核心代码</h3>
+                <code class="tang_code"><em>// 1. 离屏绘制文字，采样笔画像素</em>
+tang_o.font = '700 ' + tang_fs + 'px "Microsoft YaHei"';
+tang_o.fillStyle = '#fff';
+tang_o.fillText('唐翊斌', tang_cx, tang_cy);
+var tang_data = tang_o.getImageData(0, 0, tang_W, tang_H).data;
+if (tang_data[(tang_y * tang_W + tang_x) * 4 + 3] &gt; 130) {
+    tang_pts.push(tang_x, tang_y);          <em>// 得到一个粒子目标点</em>
+}
+
+<em>// 2. 每帧让粒子向目标点回弹</em>
+tang_p.vx = (tang_p.vx + (tang_p.tx - tang_p.x) * 0.03) * 0.9;
+tang_p.vy = (tang_p.vy + (tang_p.ty - tang_p.y) * 0.03) * 0.9;
+tang_p.x += tang_p.vx;   tang_p.y += tang_p.vy;</code>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · No CDN</div>
+    </div>
+
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_canvas = document.getElementById("tang_canvas");
+        var tang_ctx = tang_canvas.getContext("2d");
+        var tang_stage = document.getElementById("tang_stage");
+        var tang_count = document.getElementById("tang_count");
+        var tang_fps = document.getElementById("tang_fps");
+        var tang_pal = document.getElementById("tang_pal");
+        var tang_pause_text = document.getElementById("tang_pause_text");
+        var tang_btn_pause = document.getElementById("tang_btn_pause");
+        var tang_btn_shuffle = document.getElementById("tang_btn_shuffle");
+        var tang_btn_color = document.getElementById("tang_btn_color");
+
+        var tang_FONT = '"Microsoft YaHei", "PingFang SC", sans-serif';
+        var tang_TAU = Math.PI * 2;
+        var tang_dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var tang_W = 900;
+        var tang_H = 460;
+        var tang_parts = [];
+        var tang_dust = [];
+        var tang_ghost = null;
+        var tang_mouse = { x: -9999, y: -9999, on: false };
+        var tang_paused = false;
+        var tang_time = 0;
+        var tang_last = 0;
+        var tang_frames = 0;
+        var tang_fps_clock = 0;
+        var tang_palette_index = 0;
+        var tang_resize_timer = null;
+
+        var tang_palettes = [
+            { label: "橙青", stops: [[255, 176, 118], [255, 209, 102], [109, 227, 211]] },
+            { label: "蓝紫", stops: [[124, 186, 255], [186, 148, 255], [255, 138, 199]] },
+            { label: "金红", stops: [[255, 214, 128], [255, 138, 92], [255, 90, 106]] }
+        ];
+
+        function tang_rgb(c) {
+            return "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
+        }
+
+        function tang_rgba(c, a) {
+            return "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + a + ")";
+        }
+
+        function tang_colorAt(t) {
+            var tang_stops = tang_palettes[tang_palette_index].stops;
+            var tang_pos;
+            var tang_i;
+            var tang_f;
+            var tang_a;
+            var tang_b;
+            if (t < 0) { t = 0; }
+            if (t > 1) { t = 1; }
+            tang_pos = t * (tang_stops.length - 1);
+            tang_i = Math.min(tang_stops.length - 2, Math.floor(tang_pos));
+            tang_f = tang_pos - tang_i;
+            tang_a = tang_stops[tang_i];
+            tang_b = tang_stops[tang_i + 1];
+            return [
+                Math.round(tang_a[0] + (tang_b[0] - tang_a[0]) * tang_f),
+                Math.round(tang_a[1] + (tang_b[1] - tang_a[1]) * tang_f),
+                Math.round(tang_a[2] + (tang_b[2] - tang_a[2]) * tang_f)
+            ];
+        }
+
+        function tang_applyColors() {
+            var tang_i;
+            var tang_p;
+            var tang_c;
+            for (tang_i = 0; tang_i < tang_parts.length; tang_i++) {
+                tang_p = tang_parts[tang_i];
+                tang_c = tang_colorAt(tang_p.t);
+                tang_p.rgb = tang_rgb(tang_c);
+                tang_p.glow = tang_rgba(tang_c, 0.16);
+            }
+        }
+
+        function tang_buildTargets() {
+            var tang_off = document.createElement("canvas");
+            var tang_o;
+            var tang_fs;
+            var tang_chars = ["唐", "翊", "斌"];
+            var tang_gap;
+            var tang_widths = [];
+            var tang_total;
+            var tang_x;
+            var tang_cy;
+            var tang_ghost_items = [];
+            var tang_i;
+            var tang_cx;
+            var tang_data;
+            var tang_step;
+            var tang_pts = [];
+            var tang_minX = tang_W;
+            var tang_maxX = 0;
+            var tang_px;
+            var tang_py;
+            var tang_span;
+            var tang_list = [];
+            var tang_j;
+            var tang_tx;
+            var tang_ty;
+            var tang_t;
+            var tang_sx;
+            var tang_sy;
+
+            tang_off.width = tang_W;
+            tang_off.height = tang_H;
+            tang_o = tang_off.getContext("2d");
+            tang_o.textAlign = "center";
+            tang_o.textBaseline = "middle";
+            tang_fs = Math.min(tang_W * 0.215, tang_H * 0.56);
+            tang_o.font = "700 " + tang_fs + "px " + tang_FONT;
+            tang_gap = tang_fs * 0.12;
+            for (tang_i = 0; tang_i < tang_chars.length; tang_i++) {
+                tang_widths.push(tang_o.measureText(tang_chars[tang_i]).width);
+            }
+            tang_total = tang_widths[0] + tang_widths[1] + tang_widths[2] + tang_gap * 2;
+            tang_x = (tang_W - tang_total) / 2;
+            tang_cy = tang_H * 0.46;
+            tang_o.fillStyle = "#ffffff";
+            for (tang_i = 0; tang_i < tang_chars.length; tang_i++) {
+                tang_cx = tang_x + tang_widths[tang_i] / 2;
+                tang_o.fillText(tang_chars[tang_i], tang_cx, tang_cy);
+                tang_ghost_items.push({ c: tang_chars[tang_i], x: tang_cx });
+                tang_x += tang_widths[tang_i] + tang_gap;
+            }
+            tang_ghost = { fs: tang_fs, cy: tang_cy, items: tang_ghost_items };
+
+            tang_data = tang_o.getImageData(0, 0, tang_W, tang_H).data;
+            tang_step = tang_W < 520 ? 2 : (tang_W < 900 ? 3 : 4);
+            for (tang_py = 0; tang_py < tang_H; tang_py += tang_step) {
+                for (tang_px = 0; tang_px < tang_W; tang_px += tang_step) {
+                    if (tang_data[(tang_py * tang_W + tang_px) * 4 + 3] > 130) {
+                        tang_pts.push(tang_px, tang_py);
+                        if (tang_px < tang_minX) { tang_minX = tang_px; }
+                        if (tang_px > tang_maxX) { tang_maxX = tang_px; }
+                    }
+                }
+            }
+
+            tang_span = Math.max(1, tang_maxX - tang_minX);
+            for (tang_j = 0; tang_j < tang_pts.length; tang_j += 2) {
+                tang_tx = tang_pts[tang_j];
+                tang_ty = tang_pts[tang_j + 1];
+                tang_t = (tang_tx - tang_minX) / tang_span;
+                tang_sx = Math.random() * tang_W;
+                tang_sy = Math.random() * tang_H;
+                var tang_color = tang_colorAt(tang_t);
+                tang_list.push({
+                    tx: tang_tx,
+                    ty: tang_ty,
+                    x: tang_sx,
+                    y: tang_sy,
+                    px: tang_sx,
+                    py: tang_sy,
+                    vx: (Math.random() - 0.5) * 2.4,
+                    vy: (Math.random() - 0.5) * 2.4,
+                    r: 0.9 + Math.random() * 1.3,
+                    t: tang_t,
+                    ph: Math.random() * tang_TAU,
+                    sp: 0.5 + Math.random() * 1.2,
+                    rgb: tang_rgb(tang_color),
+                    glow: tang_rgba(tang_color, 0.16)
+                });
+            }
+            tang_parts = tang_list;
+            tang_count.textContent = tang_list.length;
+        }
+
+        function tang_buildDust() {
+            var tang_n;
+            var tang_i;
+            tang_dust = [];
+            tang_n = Math.min(120, Math.round(tang_W / 16));
+            for (tang_i = 0; tang_i < tang_n; tang_i++) {
+                tang_dust.push({
+                    x: Math.random() * tang_W,
+                    y: Math.random() * tang_H,
+                    r: Math.random() * 1.5 + 0.4,
+                    s: 0.1 + Math.random() * 0.45,
+                    a: 0.05 + Math.random() * 0.2,
+                    ph: Math.random() * tang_TAU
+                });
+            }
+        }
+
+        function tang_fit() {
+            tang_W = Math.max(320, Math.round(tang_stage.clientWidth));
+            tang_H = Math.max(280, Math.round(tang_stage.clientHeight));
+            tang_canvas.width = Math.round(tang_W * tang_dpr);
+            tang_canvas.height = Math.round(tang_H * tang_dpr);
+            tang_ctx.setTransform(tang_dpr, 0, 0, tang_dpr, 0, 0);
+            tang_buildTargets();
+            tang_buildDust();
+        }
+
+        function tang_drawBackground(dt) {
+            var tang_ctx2 = tang_ctx;
+            var tang_bg = tang_ctx2.createLinearGradient(0, 0, tang_W * 0.45, tang_H);
+            var tang_glow;
+            var tang_main = tang_palettes[tang_palette_index].stops[1];
+            var tang_gap = 56;
+            var tang_x;
+            var tang_y;
+            var tang_i;
+            var tang_d;
+
+            tang_bg.addColorStop(0, "#08161c");
+            tang_bg.addColorStop(0.55, "#0a2029");
+            tang_bg.addColorStop(1, "#071318");
+            tang_ctx2.fillStyle = tang_bg;
+            tang_ctx2.fillRect(0, 0, tang_W, tang_H);
+
+            tang_glow = tang_ctx2.createRadialGradient(
+                tang_W / 2, tang_H * 0.46, 10,
+                tang_W / 2, tang_H * 0.46, Math.max(tang_W, tang_H) * 0.55
+            );
+            tang_glow.addColorStop(0, tang_rgba(tang_main, 0.16));
+            tang_glow.addColorStop(0.45, tang_rgba(tang_main, 0.05));
+            tang_glow.addColorStop(1, "rgba(0,0,0,0)");
+            tang_ctx2.fillStyle = tang_glow;
+            tang_ctx2.fillRect(0, 0, tang_W, tang_H);
+
+            if (tang_ghost) {
+                tang_ctx2.textAlign = "center";
+                tang_ctx2.textBaseline = "middle";
+                tang_ctx2.font = "700 " + tang_ghost.fs + "px " + tang_FONT;
+                tang_ctx2.fillStyle = "rgba(170,232,232,.05)";
+                for (tang_i = 0; tang_i < tang_ghost.items.length; tang_i++) {
+                    tang_ctx2.fillText(tang_ghost.items[tang_i].c, tang_ghost.items[tang_i].x, tang_ghost.cy);
+                }
+            }
+
+            tang_ctx2.strokeStyle = "rgba(140,220,220,.05)";
+            tang_ctx2.lineWidth = 1;
+            tang_ctx2.beginPath();
+            for (tang_x = 0; tang_x <= tang_W; tang_x += tang_gap) {
+                tang_ctx2.moveTo(tang_x + 0.5, 0);
+                tang_ctx2.lineTo(tang_x + 0.5, tang_H);
+            }
+            for (tang_y = 0; tang_y <= tang_H; tang_y += tang_gap) {
+                tang_ctx2.moveTo(0, tang_y + 0.5);
+                tang_ctx2.lineTo(tang_W, tang_y + 0.5);
+            }
+            tang_ctx2.stroke();
+
+            for (tang_i = 0; tang_i < tang_dust.length; tang_i++) {
+                tang_d = tang_dust[tang_i];
+                tang_d.y -= tang_d.s * dt;
+                tang_d.x += Math.sin(tang_time * 0.0008 + tang_d.ph) * 0.15 * dt;
+                if (tang_d.y < -6) {
+                    tang_d.y = tang_H + 6;
+                    tang_d.x = Math.random() * tang_W;
+                }
+                tang_ctx2.fillStyle = "rgba(190,235,235," + tang_d.a + ")";
+                tang_ctx2.beginPath();
+                tang_ctx2.arc(tang_d.x, tang_d.y, tang_d.r, 0, tang_TAU);
+                tang_ctx2.fill();
+            }
+        }
+
+        function tang_update(now, dt) {
+            var tang_i;
+            var tang_p;
+            var tang_tx;
+            var tang_ty;
+            var tang_ax;
+            var tang_ay;
+            var tang_dx;
+            var tang_dy;
+            var tang_d2;
+            var tang_dist;
+            var tang_force;
+            var tang_R = 86;
+
+            for (tang_i = 0; tang_i < tang_parts.length; tang_i++) {
+                tang_p = tang_parts[tang_i];
+                tang_tx = tang_p.tx + Math.cos(now * 0.0011 * tang_p.sp + tang_p.ph) * 2.2;
+                tang_ty = tang_p.ty + Math.sin(now * 0.0009 * tang_p.sp + tang_p.ph) * 2.2;
+                tang_ax = (tang_tx - tang_p.x) * 0.03;
+                tang_ay = (tang_ty - tang_p.y) * 0.03;
+
+                if (tang_mouse.on) {
+                    tang_dx = tang_p.x - tang_mouse.x;
+                    tang_dy = tang_p.y - tang_mouse.y;
+                    tang_d2 = tang_dx * tang_dx + tang_dy * tang_dy;
+                    if (tang_d2 < tang_R * tang_R && tang_d2 > 0.01) {
+                        tang_dist = Math.sqrt(tang_d2);
+                        tang_force = (1 - tang_dist / tang_R) * 9;
+                        tang_ax += (tang_dx / tang_dist) * tang_force;
+                        tang_ay += (tang_dy / tang_dist) * tang_force;
+                    }
+                }
+
+                tang_p.vx = (tang_p.vx + tang_ax * dt) * Math.pow(0.9, dt);
+                tang_p.vy = (tang_p.vy + tang_ay * dt) * Math.pow(0.9, dt);
+                tang_p.px = tang_p.x;
+                tang_p.py = tang_p.y;
+                tang_p.x += tang_p.vx * dt;
+                tang_p.y += tang_p.vy * dt;
+            }
+        }
+
+        function tang_drawParticles() {
+            var tang_i;
+            var tang_p;
+            var tang_ctx2 = tang_ctx;
+            for (tang_i = 0; tang_i < tang_parts.length; tang_i++) {
+                tang_p = tang_parts[tang_i];
+
+                if (Math.abs(tang_p.x - tang_p.px) + Math.abs(tang_p.y - tang_p.py) > 0.35) {
+                    tang_ctx2.strokeStyle = tang_p.glow;
+                    tang_ctx2.lineWidth = tang_p.r;
+                    tang_ctx2.beginPath();
+                    tang_ctx2.moveTo(tang_p.px, tang_p.py);
+                    tang_ctx2.lineTo(tang_p.x, tang_p.y);
+                    tang_ctx2.stroke();
+                }
+
+                if (tang_i % 2 === 0) {
+                    tang_ctx2.fillStyle = tang_p.glow;
+                    tang_ctx2.beginPath();
+                    tang_ctx2.arc(tang_p.x, tang_p.y, tang_p.r * 2.6, 0, tang_TAU);
+                    tang_ctx2.fill();
+                }
+
+                tang_ctx2.fillStyle = tang_p.rgb;
+                tang_ctx2.beginPath();
+                tang_ctx2.arc(tang_p.x, tang_p.y, tang_p.r, 0, tang_TAU);
+                tang_ctx2.fill();
+            }
+        }
+
+        function tang_drawScan() {
+            var tang_y = (tang_time * 0.035) % (tang_H + 200) - 100;
+            var tang_g = tang_ctx.createLinearGradient(0, tang_y - 50, 0, tang_y + 50);
+            tang_g.addColorStop(0, "rgba(160,240,235,0)");
+            tang_g.addColorStop(0.5, "rgba(160,240,235,.05)");
+            tang_g.addColorStop(1, "rgba(160,240,235,0)");
+            tang_ctx.fillStyle = tang_g;
+            tang_ctx.fillRect(0, tang_y - 50, tang_W, 100);
+        }
+
+        function tang_draw(dt) {
+            tang_ctx.setTransform(tang_dpr, 0, 0, tang_dpr, 0, 0);
+            tang_drawBackground(dt);
+            tang_drawParticles();
+            tang_drawScan();
+        }
+
+        function tang_burst(cx, cy) {
+            var tang_i;
+            var tang_p;
+            var tang_dx;
+            var tang_dy;
+            var tang_d;
+            var tang_power;
+            for (tang_i = 0; tang_i < tang_parts.length; tang_i++) {
+                tang_p = tang_parts[tang_i];
+                tang_dx = tang_p.x - cx;
+                tang_dy = tang_p.y - cy;
+                tang_d = Math.sqrt(tang_dx * tang_dx + tang_dy * tang_dy) || 1;
+                tang_power = Math.max(0, 1 - tang_d / 340) * 13 + 2;
+                tang_p.vx += (tang_dx / tang_d) * tang_power;
+                tang_p.vy += (tang_dy / tang_d) * tang_power;
+            }
+        }
+
+        function tang_shuffle() {
+            var tang_i;
+            var tang_p;
+            for (tang_i = 0; tang_i < tang_parts.length; tang_i++) {
+                tang_p = tang_parts[tang_i];
+                tang_p.x = Math.random() * tang_W;
+                tang_p.y = Math.random() * tang_H;
+                tang_p.px = tang_p.x;
+                tang_p.py = tang_p.y;
+                tang_p.vx = (Math.random() - 0.5) * 4;
+                tang_p.vy = (Math.random() - 0.5) * 4;
+            }
+        }
+
+        function tang_loop(now) {
+            requestAnimationFrame(tang_loop);
+            if (!tang_last) { tang_last = now; }
+            var tang_delta = now - tang_last;
+            var tang_dt;
+            tang_last = now;
+            if (tang_delta > 64) { tang_delta = 64; }
+            tang_dt = tang_delta / 16.667;
+            if (tang_dt < 0.25) { tang_dt = 0.25; }
+            tang_time = now;
+            if (tang_paused) { return; }
+            tang_update(now, tang_dt);
+            tang_draw(tang_dt);
+            tang_frames++;
+            if (now - tang_fps_clock >= 500) {
+                tang_fps.textContent = Math.round(tang_frames * 1000 / (now - tang_fps_clock));
+                tang_fps_clock = now;
+                tang_frames = 0;
+            }
+        }
+
+        function tang_pointerPos(e) {
+            var tang_rect = tang_canvas.getBoundingClientRect();
+            return {
+                x: (e.clientX - tang_rect.left) * (tang_W / tang_rect.width),
+                y: (e.clientY - tang_rect.top) * (tang_H / tang_rect.height)
+            };
+        }
+
+        tang_canvas.addEventListener("pointermove", function (e) {
+            var tang_pos = tang_pointerPos(e);
+            tang_mouse.x = tang_pos.x;
+            tang_mouse.y = tang_pos.y;
+            tang_mouse.on = true;
+        });
+
+        tang_canvas.addEventListener("pointerleave", function () {
+            tang_mouse.on = false;
+            tang_mouse.x = -9999;
+            tang_mouse.y = -9999;
+        });
+
+        tang_canvas.addEventListener("pointerdown", function (e) {
+            var tang_pos = tang_pointerPos(e);
+            tang_burst(tang_pos.x, tang_pos.y);
+        });
+
+        tang_btn_pause.addEventListener("click", function () {
+            tang_paused = !tang_paused;
+            tang_pause_text.textContent = tang_paused ? "继续动画" : "暂停动画";
+            if (tang_paused) { tang_draw(0.001); }
+        });
+
+        tang_btn_shuffle.addEventListener("click", function () {
+            tang_shuffle();
+            if (tang_paused) { tang_draw(0.001); }
+        });
+
+        tang_btn_color.addEventListener("click", function () {
+            tang_palette_index = (tang_palette_index + 1) % tang_palettes.length;
+            tang_pal.textContent = tang_palettes[tang_palette_index].label;
+            tang_applyColors();
+            if (tang_paused) { tang_draw(0.001); }
+        });
+
+        function tang_relayout() {
+            clearTimeout(tang_resize_timer);
+            tang_resize_timer = setTimeout(function () {
+                var tang_w = Math.round(tang_stage.clientWidth);
+                var tang_h = Math.round(tang_stage.clientHeight);
+                if (tang_w === tang_W && tang_h === tang_H) { return; }
+                tang_fit();
+                if (tang_paused) { tang_draw(0.001); }
+            }, 160);
+        }
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(tang_relayout).observe(tang_stage);
+        } else {
+            window.addEventListener("resize", tang_relayout);
+        }
+
+        tang_fit();
+        requestAnimationFrame(tang_loop);
+    })();
+    </script>
+</body>
+</html>

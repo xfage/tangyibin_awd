@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-2 Canvas 全站系统架构图｜首都图书馆</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 13:33，使用模型：DeepSeek-V4.1-Flash，功能名称：基于 Canvas 绘制首都图书馆全站系统架构图 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 22px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .tang_toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border: 1px solid transparent; border-radius: 8px; background: var(--tang_orange);
+            color: #fff; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn_ghost { background: #fff; color: var(--tang_blue); border-color: var(--tang_line); }
+        .tang_btn_ghost:hover { background: #eef3f6; }
+        .tang_note { margin-left: auto; color: var(--tang_muted); font-size: 13px; }
+
+        .tang_canvas_wrap {
+            padding: 8px; overflow-x: auto; border: 1px solid var(--tang_line);
+            border-radius: 16px; background: #f6fafb; box-shadow: var(--tang_shadow);
+        }
+        .tang_canvas {
+            display: block; width: 100%; min-width: 760px; height: auto;
+            aspect-ratio: 1180 / 880; border-radius: 10px; cursor: default;
+        }
+        .tang_hover_note {
+            min-height: 44px; margin-top: 10px; padding: 10px 15px; border-radius: 9px;
+            background: #eef4f6; color: var(--tang_muted); font-size: 13px;
+            transition: background-color .2s ease, color .2s ease;
+        }
+        .tang_hover_active { background: #e4f0ee; color: #1f514c; }
+
+        .tang_section_title { margin: 38px 0 16px; font-size: 20px; }
+        .tang_section_title small { margin-left: 10px; color: var(--tang_muted); font-size: 12px; font-weight: 400; letter-spacing: 1px; }
+        .tang_layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .tang_layer {
+            padding: 18px 20px; border: 1px solid var(--tang_line); border-top: 3px solid var(--tang_c);
+            border-radius: 12px; background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_layer_no { color: var(--tang_c); font-family: Georgia, serif; font-size: 12px; letter-spacing: 1px; }
+        .tang_layer h3 { margin: 4px 0 6px; font-size: 16px; }
+        .tang_layer p { color: var(--tang_muted); font-size: 13px; }
+        .tang_l1 { --tang_c: #e66a3d; }
+        .tang_l2 { --tang_c: #d99a3a; }
+        .tang_l3 { --tang_c: #215a70; }
+        .tang_l4 { --tang_c: #3f8e8c; }
+        .tang_l5 { --tang_c: #8e6c9c; }
+        .tang_l6 { --tang_c: #617078; }
+
+        .tang_card {
+            margin-top: 22px; padding: 22px 24px; border: 1px solid var(--tang_line);
+            border-radius: 14px; background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 17px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_points { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 26px; list-style: none; }
+        .tang_points li { position: relative; padding-left: 18px; color: var(--tang_muted); font-size: 13.5px; }
+        .tang_points li::before {
+            content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px;
+            border-radius: 50%; background: var(--tang_teal);
+        }
+        .tang_points b { color: var(--tang_ink); }
+        .tang_code {
+            display: block; margin-top: 14px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 30px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 960px) {
+            .tang_layers { grid-template-columns: repeat(2, 1fr); }
+            .tang_points { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 620px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 21px; }
+            .tang_layers { grid-template-columns: 1fr; }
+            .tang_note { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe63e;</i></div>
+            <div>
+                <h1>首都图书馆全站系统架构</h1>
+                <p>六层架构 · 31 个模块 · 全部使用 Canvas 2D 绘制</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>说明：</b>整张架构图由 <code>canvas.getContext("2d")</code> 绘制：圆角矩形表示模块，渐变虚线表示层间链路，
+            流动光点表示数据流（橙色下行请求、青色上行响应）。<b>鼠标悬停</b>可查看模块职责，页面支持暂停动画与导出 PNG。
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_pause" type="button">
+                <i class="iconfont">&#xe63b;</i><span id="tang_pause_label">暂停动画</span>
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_replay" type="button">
+                <i class="iconfont">&#xe64c;</i>重新播放
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_export" type="button">
+                <i class="iconfont">&#xe63e;</i>导出 PNG
+            </button>
+            <span class="tang_note">逻辑画布 1180 × 880 · 按容器宽度等比缩放</span>
+        </div>
+
+        <div class="tang_canvas_wrap">
+            <canvas class="tang_canvas" id="tang_arch"></canvas>
+        </div>
+        <div class="tang_hover_note" id="tang_hover_text">悬停画布中的模块，可查看该模块的职责说明</div>
+
+        <h2 class="tang_section_title">架构分层说明<small>SIX LAYERS</small></h2>
+        <div class="tang_layers">
+            <div class="tang_layer tang_l1">
+                <span class="tang_layer_no">01 / USER ACCESS</span>
+                <h3>用户访问层</h3>
+                <p>PC 浏览器、手机 H5、微信小程序、馆内自助终端与无障碍版本，覆盖到馆与在线两类读者。</p>
+            </div>
+            <div class="tang_layer tang_l2">
+                <span class="tang_layer_no">02 / EDGE &amp; SECURITY</span>
+                <h3>接入与安全层</h3>
+                <p>CDN 静态加速、WAF 防火墙、Nginx 负载均衡与 HTTPS 证书共同承接公网流量，兼顾速度与安全。</p>
+            </div>
+            <div class="tang_layer tang_l3">
+                <span class="tang_layer_no">03 / APPLICATION</span>
+                <h3>应用服务层</h3>
+                <p>门户网站、OPAC 馆藏检索、读者中心、数字资源、活动预约、参考咨询等 8 个核心业务模块。</p>
+            </div>
+            <div class="tang_layer tang_l4">
+                <span class="tang_layer_no">04 / COMMON SERVICE</span>
+                <h3>公共服务层</h3>
+                <p>统一身份认证 SSO、短信邮件、微信开放接口、在线支付与日志审计等可复用的通用能力。</p>
+            </div>
+            <div class="tang_layer tang_l5">
+                <span class="tang_layer_no">05 / DATA &amp; CACHE</span>
+                <h3>数据与缓存层</h3>
+                <p>MySQL 业务库、Redis 缓存、Elasticsearch 检索索引、MinIO 对象存储与备份归档。</p>
+            </div>
+            <div class="tang_layer tang_l6">
+                <span class="tang_layer_no">06 / INFRASTRUCTURE</span>
+                <h3>基础设施层</h3>
+                <p>应用与数据库服务器集群、监控告警、容灾备份与馆内专线，构成全站稳定运行的底座。</p>
+            </div>
+        </div>
+
+        <div class="tang_card">
+            <h3><i class="iconfont">&#xe600;</i>Canvas 绘制要点</h3>
+            <ul class="tang_points">
+                <li><b>坐标体系：</b>以 1180 × 880 的逻辑坐标绘图，按容器宽度等比缩放，高清屏自动乘 devicePixelRatio。</li>
+                <li><b>圆角矩形：</b>用 arcTo 绘制卡片与分层色条，浅色底 + 描边区分六个层级。</li>
+                <li><b>连接链路：</b>线性渐变 + 动态虚线与箭头表示层间调用，循环光点表示上下行数据流。</li>
+                <li><b>交互命中：</b>pointermove 换算逻辑坐标后做矩形命中检测，悬停高亮模块并绘制说明浮层。</li>
+                <li><b>导出图片：</b>离屏 canvas 以 2 倍分辨率重绘整张图，toDataURL 导出 PNG。</li>
+                <li><b>自适应：</b>窄屏时画布保持最小宽度并在容器内横向滚动，保证模块文字清晰可读。</li>
+            </ul>
+            <code class="tang_code"><em>// 高清屏适配：逻辑坐标 × 缩放比</em>
+tang_ctx.setTransform(tang_w / 1180, 0, 0, tang_h / 880, 0, 0);
+tang_rr(tang_ctx, x, y, w, h, 10);          <em>// arcTo 圆角矩形</em>
+tang_ctx.fillStyle = "#ffffff";
+tang_ctx.fill();
+
+tang_ctx.setLineDash([5, 5]);               <em>// 层间流动虚线</em>
+tang_ctx.lineDashOffset = -(tang_clock * 0.03);
+tang_ctx.stroke();</code>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · Canvas 2D · No CDN</div>
+    </div>
+
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_canvas = document.getElementById("tang_arch");
+        var tang_ctx = tang_canvas.getContext("2d");
+        var tang_btn_pause = document.getElementById("tang_btn_pause");
+        var tang_pause_label = document.getElementById("tang_pause_label");
+        var tang_btn_replay = document.getElementById("tang_btn_replay");
+        var tang_btn_export = document.getElementById("tang_btn_export");
+        var tang_hover_text = document.getElementById("tang_hover_text");
+
+        var tang_WL = 1180;
+        var tang_HL = 880;
+        var tang_TAU = Math.PI * 2;
+        var tang_contentX = 184;
+        var tang_contentW = 956;
+        var tang_dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var tang_clock = 0;
+        var tang_last = 0;
+        var tang_paused = false;
+        var tang_hover = null;
+        var tang_mouse = { x: -1, y: -1 };
+        var tang_boxes = [];
+
+        var tang_FONT = '"Microsoft YaHei", "PingFang SC", sans-serif';
+
+        var tang_layers = [
+            {
+                no: "01", name: "用户访问层", color: "#e66a3d", y: 102, h: 58, rows: 1,
+                items: [
+                    { t: "PC 浏览器", d: "桌面端访问门户，浏览馆情资讯、检索馆藏并管理借阅。" },
+                    { t: "手机 H5", d: "自适应手机网页，支持馆藏检索、续借与活动报名。" },
+                    { t: "微信小程序", d: "微信内扫码借书、电子读者证与活动预约入口。" },
+                    { t: "馆内自助终端", d: "自助借还机、检索机与自助打印，部署在馆内各楼层。" },
+                    { t: "无障碍与老年版", d: "大字模式、读屏适配与语音导读，服务特殊读者群体。" }
+                ]
+            },
+            {
+                no: "02", name: "接入与安全层", color: "#d99a3a", y: 198, h: 58, rows: 1,
+                items: [
+                    { t: "CDN 静态加速", d: "分发页面、封面图与电子书文件，降低源站带宽压力。" },
+                    { t: "WAF 防火墙", d: "过滤 SQL 注入、XSS 与恶意爬虫，保护门户安全。" },
+                    { t: "Nginx 负载均衡", d: "反向代理、多节点分流与健康检查，支持灰度发布。" },
+                    { t: "HTTPS 证书", d: "全站 TLS 加密传输，保护读者账号与借阅隐私。" }
+                ]
+            },
+            {
+                no: "03", name: "应用服务层", color: "#215a70", y: 294, h: 130, rows: 2,
+                items: [
+                    { t: "门户网站", d: "首页、公告资讯、馆情概况与读者指南的内容发布。" },
+                    { t: "馆藏检索 OPAC", d: "按题名、作者、ISBN 检索书目与馆藏状态。" },
+                    { t: "读者中心", d: "我的借阅、续借、预约、欠款与电子读者证管理。" },
+                    { t: "数字资源", d: "电子书、期刊数据库与音视频资源的统一访问入口。" },
+                    { t: "活动预约", d: "讲座、展览与少儿活动的发布、报名与签到。" },
+                    { t: "参考咨询", d: "在线咨询、留言反馈、文献传递与学科馆员服务。" },
+                    { t: "统一搜索", d: "跨书目、数据库与资讯的一站式检索与结果聚合。" },
+                    { t: "内容管理 CMS", d: "栏目、专题与页面的可视化编辑、审核与发布。" }
+                ]
+            },
+            {
+                no: "04", name: "公共服务层", color: "#3f8e8c", y: 462, h: 58, rows: 1,
+                items: [
+                    { t: "统一身份认证 SSO", d: "一次登录贯通门户、数字资源与馆内自助终端。" },
+                    { t: "短信与邮件", d: "借阅到期提醒、预约到馆通知与验证码下发。" },
+                    { t: "微信开放接口", d: "小程序登录、模板消息与扫码借阅能力。" },
+                    { t: "在线支付", d: "违约金缴纳、活动押金与电子票据开具。" },
+                    { t: "日志与审计", d: "访问日志、操作留痕与安全审计分析。" }
+                ]
+            },
+            {
+                no: "05", name: "数据与缓存层", color: "#8e6c9c", y: 558, h: 58, rows: 1,
+                items: [
+                    { t: "MySQL 业务库", d: "读者、借阅、预约与活动等核心业务数据。" },
+                    { t: "Redis 缓存", d: "会话、热门榜单与检索结果缓存，提升响应速度。" },
+                    { t: "Elasticsearch", d: "书目与全文检索索引，支持分词、聚合与高亮。" },
+                    { t: "MinIO 对象存储", d: "电子书、封面图与活动图片等非结构化文件。" },
+                    { t: "备份与归档", d: "数据库定时备份、离线归档与灾备恢复。" }
+                ]
+            },
+            {
+                no: "06", name: "基础设施层", color: "#617078", y: 654, h: 58, rows: 1,
+                items: [
+                    { t: "应用服务器集群", d: "多台应用节点配合负载均衡横向扩展。" },
+                    { t: "数据库服务器", d: "主从架构与读写分离，保障业务连续性。" },
+                    { t: "监控与告警", d: "主机、接口与业务指标监控，异常即时通知。" },
+                    { t: "容灾与专线", d: "同城备份机房与馆内专线，保障网络稳定。" }
+                ]
+            }
+        ];
+
+        function tang_font(ctx, size, weight) {
+            ctx.font = (weight || 400) + " " + size + "px " + tang_FONT;
+        }
+
+        function tang_alpha(hex, a) {
+            var tang_r = parseInt(hex.slice(1, 3), 16);
+            var tang_g = parseInt(hex.slice(3, 5), 16);
+            var tang_b = parseInt(hex.slice(5, 7), 16);
+            return "rgba(" + tang_r + "," + tang_g + "," + tang_b + "," + a + ")";
+        }
+
+        function tang_rr(ctx, x, y, w, h, r) {
+            var tang_rr2 = Math.min(r, w / 2, h / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + tang_rr2, y);
+            ctx.arcTo(x + w, y, x + w, y + h, tang_rr2);
+            ctx.arcTo(x + w, y + h, x, y + h, tang_rr2);
+            ctx.arcTo(x, y + h, x, y, tang_rr2);
+            ctx.arcTo(x, y, x + w, y, tang_rr2);
+            ctx.closePath();
+        }
+
+        function tang_arrow(ctx, x, y, dir, color) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + dir * 5);
+            ctx.lineTo(x - 3.5, y - dir * 2.5);
+            ctx.lineTo(x + 3.5, y - dir * 2.5);
+            ctx.closePath();
+            ctx.fillStyle = tang_alpha(color, 0.75);
+            ctx.fill();
+        }
+
+        function tang_layout() {
+            var tang_gap = 12;
+            var tang_bh = 58;
+            var tang_i;
+            var tang_j;
+            var tang_layer;
+            var tang_cols;
+            var tang_bw;
+            var tang_item;
+            var tang_row;
+            var tang_col;
+            var tang_x;
+            var tang_y;
+            var tang_box;
+
+            tang_boxes = [];
+            for (tang_i = 0; tang_i < tang_layers.length; tang_i++) {
+                tang_layer = tang_layers[tang_i];
+                tang_cols = tang_layer.rows === 2 ? 4 : tang_layer.items.length;
+                tang_bw = (tang_contentW - tang_gap * (tang_cols - 1)) / tang_cols;
+                tang_layer.boxes = [];
+                for (tang_j = 0; tang_j < tang_layer.items.length; tang_j++) {
+                    tang_item = tang_layer.items[tang_j];
+                    tang_row = Math.floor(tang_j / tang_cols);
+                    tang_col = tang_j % tang_cols;
+                    tang_x = tang_contentX + tang_col * (tang_bw + tang_gap);
+                    tang_y = tang_layer.y + tang_row * (tang_bh + 14);
+                    tang_box = {
+                        x: tang_x, y: tang_y, w: tang_bw, h: tang_bh,
+                        item: tang_item, layer: tang_layer
+                    };
+                    tang_layer.boxes.push(tang_box);
+                    tang_boxes.push(tang_box);
+                }
+            }
+        }
+
+        function tang_draw_background(ctx) {
+            var tang_bg = ctx.createLinearGradient(0, 0, tang_WL, tang_HL);
+            var tang_x;
+            var tang_y;
+            tang_bg.addColorStop(0, "#f8fbfc");
+            tang_bg.addColorStop(0.55, "#f2f7f9");
+            tang_bg.addColorStop(1, "#eaf1f4");
+            ctx.fillStyle = tang_bg;
+            ctx.fillRect(0, 0, tang_WL, tang_HL);
+
+            ctx.strokeStyle = "rgba(33,90,112,.055)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (tang_x = 24; tang_x < tang_WL; tang_x += 32) {
+                ctx.moveTo(tang_x + 0.5, 0);
+                ctx.lineTo(tang_x + 0.5, tang_HL);
+            }
+            for (tang_y = 24; tang_y < tang_HL; tang_y += 32) {
+                ctx.moveTo(0, tang_y + 0.5);
+                ctx.lineTo(tang_WL, tang_y + 0.5);
+            }
+            ctx.stroke();
+        }
+
+        function tang_draw_title(ctx) {
+            var tang_lg = ctx.createLinearGradient(40, 26, 78, 64);
+            var tang_badge = "6 层 · 31 个模块";
+            var tang_bw;
+            tang_lg.addColorStop(0, "#e66a3d");
+            tang_lg.addColorStop(1, "#d99a3a");
+            tang_rr(ctx, 40, 26, 38, 38, 10);
+            ctx.fillStyle = tang_lg;
+            ctx.fill();
+
+            ctx.fillStyle = "#ffffff";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            tang_font(ctx, 19, 700);
+            ctx.fillText("首", 59, 46);
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#17232b";
+            tang_font(ctx, 26, 700);
+            ctx.fillText("首都图书馆全站系统架构", 92, 47);
+
+            ctx.fillStyle = "#71838a";
+            tang_font(ctx, 11, 400);
+            ctx.fillText("CAPITAL LIBRARY · FULL-SITE SYSTEM ARCHITECTURE · CANVAS 2D", 92, 68);
+
+            tang_font(ctx, 12, 700);
+            tang_bw = ctx.measureText(tang_badge).width + 30;
+            tang_rr(ctx, tang_WL - 40 - tang_bw, 30, tang_bw, 30, 15);
+            ctx.fillStyle = "rgba(33,90,112,.08)";
+            ctx.fill();
+            ctx.fillStyle = "#215a70";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(tang_badge, tang_WL - 40 - tang_bw / 2, 45.5);
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+        }
+
+        function tang_draw_tag(ctx, layer) {
+            tang_rr(ctx, 40, layer.y, 128, layer.h, 12);
+            ctx.fillStyle = tang_alpha(layer.color, 0.08);
+            ctx.fill();
+            ctx.strokeStyle = tang_alpha(layer.color, 0.18);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            tang_rr(ctx, 40, layer.y, 5, layer.h, 2.5);
+            ctx.fillStyle = layer.color;
+            ctx.fill();
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = layer.color;
+            tang_font(ctx, 10, 700);
+            ctx.fillText(layer.no, 58, layer.y + layer.h / 2 - 6);
+
+            ctx.fillStyle = "#233940";
+            tang_font(ctx, 14, 700);
+            ctx.fillText(layer.name, 58, layer.y + layer.h / 2 + 17);
+        }
+
+        function tang_draw_box(ctx, box, isHover) {
+            var tang_layer = box.layer;
+            var tang_size = 14;
+            ctx.save();
+            ctx.shadowColor = isHover ? tang_alpha(tang_layer.color, 0.35) : "rgba(24,48,56,.08)";
+            ctx.shadowBlur = isHover ? 16 : 8;
+            ctx.shadowOffsetY = isHover ? 5 : 2;
+            tang_rr(ctx, box.x, box.y, box.w, box.h, 10);
+            ctx.fillStyle = isHover ? tang_alpha(tang_layer.color, 0.09) : "#ffffff";
+            ctx.fill();
+            ctx.restore();
+
+            tang_rr(ctx, box.x, box.y, box.w, box.h, 10);
+            ctx.strokeStyle = isHover ? tang_layer.color : "rgba(30,60,70,.10)";
+            ctx.lineWidth = isHover ? 1.6 : 1;
+            ctx.stroke();
+
+            if (isHover) {
+                ctx.fillStyle = tang_layer.color;
+                tang_rr(ctx, box.x, box.y + 12, 3, box.h - 24, 1.5);
+                ctx.fill();
+            }
+
+            tang_font(ctx, tang_size, 700);
+            while (ctx.measureText(box.item.t).width > box.w - 26 && tang_size > 11) {
+                tang_size -= 0.5;
+                tang_font(ctx, tang_size, 700);
+            }
+            ctx.fillStyle = isHover ? tang_layer.color : "#25383f";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(box.item.t, box.x + box.w / 2, box.y + box.h / 2 + 1);
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+        }
+
+        function tang_draw_connectors(ctx, time) {
+            var tang_ratios = [0.16, 0.5, 0.84];
+            var tang_i;
+            var tang_j;
+            var tang_k;
+            var tang_a;
+            var tang_b;
+            var tang_y1;
+            var tang_y2;
+            var tang_x;
+            var tang_grad;
+            var tang_span;
+            var tang_p;
+            var tang_dy;
+            var tang_uy;
+
+            for (tang_i = 0; tang_i < tang_layers.length - 1; tang_i++) {
+                tang_a = tang_layers[tang_i];
+                tang_b = tang_layers[tang_i + 1];
+                tang_y1 = tang_a.y + tang_a.h;
+                tang_y2 = tang_b.y;
+                for (tang_j = 0; tang_j < tang_ratios.length; tang_j++) {
+                    tang_x = tang_contentX + tang_contentW * tang_ratios[tang_j];
+                    tang_grad = ctx.createLinearGradient(0, tang_y1, 0, tang_y2);
+                    tang_grad.addColorStop(0, tang_alpha(tang_a.color, 0.5));
+                    tang_grad.addColorStop(1, tang_alpha(tang_b.color, 0.5));
+                    ctx.strokeStyle = tang_grad;
+                    ctx.lineWidth = 1.4;
+                    ctx.setLineDash([5, 5]);
+                    ctx.lineDashOffset = -((time * 0.03 + tang_i * 9) % 20);
+                    ctx.beginPath();
+                    ctx.moveTo(tang_x + 0.5, tang_y1 + 5);
+                    ctx.lineTo(tang_x + 0.5, tang_y2 - 5);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    tang_arrow(ctx, tang_x, tang_y2 - 4, 1, tang_b.color);
+                    tang_arrow(ctx, tang_x, tang_y1 + 4, -1, tang_a.color);
+
+                    tang_span = tang_y2 - tang_y1 - 12;
+                    for (tang_k = 0; tang_k < 2; tang_k++) {
+                        tang_p = (time * 0.0004 + tang_k * 0.5 + tang_j * 0.17 + tang_i * 0.11) % 1;
+                        tang_dy = tang_y1 + 6 + tang_span * tang_p;
+                        ctx.fillStyle = "rgba(230,106,61,.85)";
+                        ctx.beginPath();
+                        ctx.arc(tang_x, tang_dy, 2.4, 0, tang_TAU);
+                        ctx.fill();
+
+                        tang_uy = tang_y1 + 6 + tang_span * (1 - tang_p);
+                        ctx.fillStyle = "rgba(63,142,140,.85)";
+                        ctx.beginPath();
+                        ctx.arc(tang_x + 5, tang_uy, 2.1, 0, tang_TAU);
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        function tang_draw_legend(ctx) {
+            var tang_x0 = 40;
+            var tang_y0 = 740;
+            var tang_w = 1100;
+            var tang_h = 96;
+            var tang_startX = 58;
+            var tang_i;
+            var tang_l;
+            var tang_fx = 58;
+            var tang_fy = tang_y0 + 76;
+
+            tang_rr(ctx, tang_x0, tang_y0, tang_w, tang_h, 12);
+            ctx.fillStyle = "rgba(255,255,255,.72)";
+            ctx.fill();
+            ctx.strokeStyle = "rgba(30,60,70,.08)";
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = "#71838a";
+            tang_font(ctx, 10, 700);
+            ctx.fillText("LAYERS / 分层图例", 58, tang_y0 + 22);
+
+            for (tang_i = 0; tang_i < tang_layers.length; tang_i++) {
+                tang_l = tang_layers[tang_i];
+                ctx.fillStyle = tang_l.color;
+                ctx.beginPath();
+                ctx.arc(tang_startX + 4, tang_y0 + 46, 4.5, 0, tang_TAU);
+                ctx.fill();
+                ctx.fillStyle = "#3a4d55";
+                tang_font(ctx, 12, 600);
+                ctx.fillText(tang_l.no + " " + tang_l.name, tang_startX + 15, tang_y0 + 50);
+                tang_startX += 168;
+            }
+
+            ctx.fillStyle = "#e66a3d";
+            ctx.beginPath();
+            ctx.arc(tang_fx + 4, tang_fy - 4, 3.4, 0, tang_TAU);
+            ctx.fill();
+            ctx.fillStyle = "#5b6d74";
+            tang_font(ctx, 11, 400);
+            ctx.fillText("下行请求", tang_fx + 14, tang_fy);
+
+            tang_fx += 96;
+            ctx.fillStyle = "#3f8e8c";
+            ctx.beginPath();
+            ctx.arc(tang_fx + 4, tang_fy - 4, 3.4, 0, tang_TAU);
+            ctx.fill();
+            ctx.fillStyle = "#5b6d74";
+            ctx.fillText("上行响应", tang_fx + 14, tang_fy);
+
+            tang_fx += 96;
+            ctx.fillStyle = "#8a999f";
+            ctx.fillText("虚线表示层间调用链路，光点为示意数据流 · 悬停模块查看说明", tang_fx, tang_fy);
+
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#9aabb1";
+            tang_font(ctx, 10, 400);
+            ctx.fillText("制图：唐翊斌 · 高级网页设计 · 2026", 1140, 862);
+            ctx.textAlign = "left";
+        }
+
+        function tang_wrap(ctx, text, maxW) {
+            var tang_lines = [];
+            var tang_line = "";
+            var tang_i;
+            var tang_ch;
+            var tang_test;
+            for (tang_i = 0; tang_i < text.length; tang_i++) {
+                tang_ch = text.charAt(tang_i);
+                tang_test = tang_line + tang_ch;
+                if (ctx.measureText(tang_test).width > maxW && tang_line) {
+                    tang_lines.push(tang_line);
+                    tang_line = tang_ch;
+                } else {
+                    tang_line = tang_test;
+                }
+            }
+            if (tang_line) { tang_lines.push(tang_line); }
+            return tang_lines;
+        }
+
+        function tang_draw_tooltip(ctx, box) {
+            var tang_mx = tang_mouse.x;
+            var tang_my = tang_mouse.y;
+            var tang_maxTextW = 250;
+            var tang_lines;
+            var tang_w = 282;
+            var tang_h;
+            var tang_x;
+            var tang_y;
+            var tang_i;
+
+            tang_font(ctx, 12, 400);
+            tang_lines = tang_wrap(ctx, box.item.d, tang_maxTextW);
+            tang_h = 62 + tang_lines.length * 18;
+            tang_x = tang_mx + 18;
+            tang_y = tang_my + 18;
+            if (tang_x + tang_w > tang_WL - 12) { tang_x = tang_mx - tang_w - 18; }
+            if (tang_y + tang_h > tang_HL - 12) { tang_y = tang_my - tang_h - 18; }
+            if (tang_x < 12) { tang_x = 12; }
+            if (tang_y < 12) { tang_y = 12; }
+
+            tang_rr(ctx, tang_x, tang_y, tang_w, tang_h, 10);
+            ctx.fillStyle = "rgba(20,36,43,.96)";
+            ctx.fill();
+            ctx.strokeStyle = tang_alpha(box.layer.color, 0.5);
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.textAlign = "left";
+            ctx.textBaseline = "alphabetic";
+            ctx.fillStyle = box.layer.color;
+            tang_font(ctx, 10, 700);
+            ctx.fillText(box.layer.no + " / " + box.layer.name, tang_x + 15, tang_y + 20);
+
+            ctx.fillStyle = "#ffffff";
+            tang_font(ctx, 13, 700);
+            ctx.fillText(box.item.t, tang_x + 15, tang_y + 39);
+
+            ctx.strokeStyle = "rgba(255,255,255,.12)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(tang_x + 15, tang_y + 48.5);
+            ctx.lineTo(tang_x + tang_w - 15, tang_y + 48.5);
+            ctx.stroke();
+
+            ctx.fillStyle = "rgba(235,245,246,.78)";
+            tang_font(ctx, 12, 400);
+            for (tang_i = 0; tang_i < tang_lines.length; tang_i++) {
+                ctx.fillText(tang_lines[tang_i], tang_x + 15, tang_y + 66 + tang_i * 18);
+            }
+        }
+
+        function tang_draw_scene(ctx, time, hover) {
+            var tang_i;
+            var tang_j;
+            var tang_layer;
+            tang_draw_background(ctx);
+            tang_draw_title(ctx);
+            tang_draw_connectors(ctx, time);
+            for (tang_i = 0; tang_i < tang_layers.length; tang_i++) {
+                tang_layer = tang_layers[tang_i];
+                tang_draw_tag(ctx, tang_layer);
+                for (tang_j = 0; tang_j < tang_layer.boxes.length; tang_j++) {
+                    tang_draw_box(ctx, tang_layer.boxes[tang_j], hover === tang_layer.boxes[tang_j]);
+                }
+            }
+            tang_draw_legend(ctx);
+            if (hover) { tang_draw_tooltip(ctx, hover); }
+        }
+
+        function tang_paint() {
+            var tang_w = tang_canvas.width;
+            var tang_h = tang_canvas.height;
+            if (!tang_w || !tang_h) { return; }
+            tang_ctx.setTransform(1, 0, 0, 1, 0, 0);
+            tang_ctx.clearRect(0, 0, tang_w, tang_h);
+            tang_ctx.setTransform(tang_w / tang_WL, 0, 0, tang_h / tang_HL, 0, 0);
+            tang_draw_scene(tang_ctx, tang_clock, tang_hover);
+        }
+
+        function tang_resize() {
+            var tang_rect = tang_canvas.getBoundingClientRect();
+            var tang_w = Math.max(1, Math.round(tang_rect.width * tang_dpr));
+            var tang_h = Math.max(1, Math.round(tang_rect.height * tang_dpr));
+            if (tang_canvas.width !== tang_w || tang_canvas.height !== tang_h) {
+                tang_canvas.width = tang_w;
+                tang_canvas.height = tang_h;
+            }
+            tang_paint();
+        }
+
+        function tang_pick(mx, my) {
+            var tang_i;
+            var tang_box;
+            for (tang_i = tang_boxes.length - 1; tang_i >= 0; tang_i--) {
+                tang_box = tang_boxes[tang_i];
+                if (mx >= tang_box.x && mx <= tang_box.x + tang_box.w &&
+                    my >= tang_box.y && my <= tang_box.y + tang_box.h) {
+                    return tang_box;
+                }
+            }
+            return null;
+        }
+
+        function tang_set_hover(hit) {
+            tang_hover = hit;
+            if (hit) {
+                tang_hover_text.textContent = hit.layer.name + " · " + hit.item.t + "：" + hit.item.d;
+                tang_hover_text.className = "tang_hover_note tang_hover_active";
+                tang_canvas.style.cursor = "pointer";
+            } else {
+                tang_hover_text.textContent = "悬停画布中的模块，可查看该模块的职责说明";
+                tang_hover_text.className = "tang_hover_note";
+                tang_canvas.style.cursor = "default";
+            }
+            if (tang_paused) { tang_paint(); }
+        }
+
+        function tang_loop(now) {
+            requestAnimationFrame(tang_loop);
+            if (!tang_last) { tang_last = now; }
+            var tang_delta = now - tang_last;
+            tang_last = now;
+            if (tang_delta > 100) { tang_delta = 100; }
+            if (tang_paused) { return; }
+            tang_clock += tang_delta;
+            tang_paint();
+        }
+
+        tang_canvas.addEventListener("pointermove", function (e) {
+            var tang_rect = tang_canvas.getBoundingClientRect();
+            var tang_mx = (e.clientX - tang_rect.left) / tang_rect.width * tang_WL;
+            var tang_my = (e.clientY - tang_rect.top) / tang_rect.height * tang_HL;
+            var tang_hit = tang_pick(tang_mx, tang_my);
+            tang_mouse.x = tang_mx;
+            tang_mouse.y = tang_my;
+            if (tang_hit !== tang_hover) {
+                tang_set_hover(tang_hit);
+            } else if (tang_paused) {
+                tang_paint();
+            }
+        });
+
+        tang_canvas.addEventListener("pointerleave", function () {
+            tang_mouse.x = -1;
+            tang_mouse.y = -1;
+            tang_set_hover(null);
+        });
+
+        tang_btn_pause.addEventListener("click", function () {
+            tang_paused = !tang_paused;
+            tang_pause_label.textContent = tang_paused ? "继续动画" : "暂停动画";
+            if (tang_paused) { tang_paint(); }
+        });
+
+        tang_btn_replay.addEventListener("click", function () {
+            tang_clock = 0;
+            tang_last = 0;
+            if (tang_paused) {
+                tang_paused = false;
+                tang_pause_label.textContent = "暂停动画";
+            }
+            tang_paint();
+        });
+
+        tang_btn_export.addEventListener("click", function () {
+            var tang_scale = 2;
+            var tang_out = document.createElement("canvas");
+            var tang_octx;
+            var tang_link;
+            tang_out.width = tang_WL * tang_scale;
+            tang_out.height = tang_HL * tang_scale;
+            tang_octx = tang_out.getContext("2d");
+            tang_octx.setTransform(tang_scale, 0, 0, tang_scale, 0, 0);
+            tang_draw_scene(tang_octx, tang_clock, null);
+            tang_link = document.createElement("a");
+            tang_link.download = "首都图书馆全站系统架构.png";
+            tang_link.href = tang_out.toDataURL("image/png");
+            document.body.appendChild(tang_link);
+            tang_link.click();
+            document.body.removeChild(tang_link);
+        });
+
+        if (window.ResizeObserver) {
+            new ResizeObserver(tang_resize).observe(tang_canvas);
+        } else {
+            window.addEventListener("resize", tang_resize);
+        }
+
+        tang_layout();
+        tang_resize();
+        requestAnimationFrame(tang_loop);
+    })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-3 SVG 图像识别科研系统架构图｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 13:44，使用模型：DeepSeek-V4.1-Flash，功能名称：基于 SVG 绘制图像识别科研系统的全站架构图 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 22px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .tang_toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border: 1px solid transparent; border-radius: 8px; background: var(--tang_orange);
+            color: #fff; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn_ghost { background: #fff; color: var(--tang_blue); border-color: var(--tang_line); }
+        .tang_btn_ghost:hover { background: #eef3f6; }
+        .tang_note { margin-left: auto; color: var(--tang_muted); font-size: 13px; }
+
+        .tang_diagram_wrap {
+            padding: 8px; overflow-x: auto; border: 1px solid var(--tang_line);
+            border-radius: 16px; background: #f6fafb; box-shadow: var(--tang_shadow);
+        }
+        .tang_svg { display: block; width: 100%; min-width: 900px; height: auto; border-radius: 10px; }
+
+        .tang_inspector {
+            --tang_accent: var(--tang_orange);
+            margin-top: 14px; padding: 18px 20px; border: 1px solid var(--tang_line);
+            border-left: 4px solid var(--tang_accent); border-radius: 12px; background: #fff;
+            box-shadow: var(--tang_shadow); transition: background-color .2s ease;
+        }
+        .tang_inspector_on { background: #fbfdfd; }
+        .tang_inspector_head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+        .tang_inspector_layer {
+            display: flex; align-items: center; gap: 8px; color: var(--tang_accent);
+            font-size: 12px; font-weight: 700; letter-spacing: 1px;
+        }
+        .tang_inspector_layer::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+        .tang_inspector_no { color: #9aa9af; font-family: Consolas, monospace; font-size: 11px; letter-spacing: 1px; }
+        .tang_inspector_title { margin-bottom: 4px; font-size: 17px; }
+        .tang_inspector_desc { max-width: 920px; color: var(--tang_muted); font-size: 13.5px; }
+        .tang_tags { display: flex; flex-wrap: wrap; gap: 8px; min-height: 26px; margin-top: 10px; }
+        .tang_chip { padding: 3px 11px; border-radius: 20px; background: #eef4f6; color: #3c5a63; font-size: 12px; }
+
+        .tang_section_title { margin: 38px 0 16px; font-size: 20px; }
+        .tang_section_title small { margin-left: 10px; color: var(--tang_muted); font-size: 12px; font-weight: 400; letter-spacing: 1px; }
+        .tang_grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tang_card {
+            padding: 20px 22px; border: 1px solid var(--tang_line); border-radius: 14px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 16px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_card p { color: var(--tang_muted); font-size: 13px; }
+        .tang_card_wide { grid-column: 1 / -1; margin-top: 16px; }
+        .tang_code {
+            display: block; margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 30px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: 1fr; } }
+        @media (max-width: 620px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 21px; }
+            .tang_note { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe63e;</i></div>
+            <div>
+                <h1>基于图像识别的科研系统架构</h1>
+                <p>SVG 矢量架构图 · 科研闭环与六层技术体系</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>说明：</b>整张架构图由内联 <code>SVG</code> 绘制（viewBox 1200 × 940），包含顶部科研闭环与六层技术体系；
+            模块支持<b>悬停检视</b>，可暂停流动动画、突出科研闭环，并一键导出独立的 <code>.svg</code> 矢量文件。
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_anim" type="button">
+                <i class="iconfont">&#xe63b;</i><span id="tang_anim_text">暂停流动动画</span>
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_focus" type="button">
+                <i class="iconfont">&#xe708;</i><span id="tang_focus_text">突出科研闭环</span>
+            </button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_export" type="button">
+                <i class="iconfont">&#xe63e;</i>导出 SVG
+            </button>
+            <span class="tang_note">纯矢量 · 无位图 · 无第三方图表库</span>
+        </div>
+
+        <div class="tang_diagram_wrap">
+            <svg class="tang_svg" id="tang_svg" viewBox="0 0 1200 940" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="tang_svg_title tang_svg_desc">
+                <title id="tang_svg_title">基于图像识别的科研系统架构图</title>
+                <desc id="tang_svg_desc">包含科研闭环，以及数据与标注、训练与计算、算法模型、评估与解释、推理与部署、科研支撑六个层级共二十四个模块的 SVG 架构图。</desc>
+                <defs>
+                    <linearGradient id="tang_s_bg_grad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#f8fbfc"/>
+                        <stop offset="0.55" stop-color="#f1f7f9"/>
+                        <stop offset="1" stop-color="#e9f0f3"/>
+                    </linearGradient>
+                    <linearGradient id="tang_s_logo_grad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#e66a3d"/>
+                        <stop offset="1" stop-color="#215a70"/>
+                    </linearGradient>
+                    <pattern id="tang_s_grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                        <path d="M32 0H0V32" fill="none" stroke="#215a70" stroke-opacity="0.055"/>
+                    </pattern>
+                    <marker id="tang_s_arrow" viewBox="0 0 10 10" refX="7.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                        <path d="M0 0 L10 5 L0 10 Z" fill="#a8b8be"/>
+                    </marker>
+                    <style>
+                        .tang_svg text { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+                        .tang_s_logo_text { fill: #ffffff; font-size: 21px; font-weight: 700; text-anchor: middle; }
+                        .tang_s_title { fill: #17232b; font-size: 27px; font-weight: 700; }
+                        .tang_s_subtitle { fill: #71838a; font-size: 10.5px; letter-spacing: 1.2px; }
+                        .tang_s_badge_text { fill: #215a70; font-size: 11.5px; font-weight: 600; text-anchor: middle; }
+                        .tang_s_band_title { fill: #215a70; font-size: 12.5px; font-weight: 700; letter-spacing: 1px; }
+                        .tang_s_band_en { fill: #93a4aa; font-size: 8.5px; letter-spacing: 1.4px; }
+                        .tang_s_stage_text { fill: #3c545c; font-size: 11.5px; text-anchor: middle; }
+                        .tang_s_stage_no { fill: #e66a3d; font-weight: 700; }
+                        .tang_s_stage_arrow { fill: none; stroke: #b9c8cd; stroke-width: 1.2; }
+                        .tang_s_feedback { fill: none; stroke: #b6c6cb; stroke-width: 1.3; stroke-dasharray: 6 6; animation: tang_s_dash 2.4s linear infinite; }
+                        .tang_s_flow { fill: none; stroke: #adbfc6; stroke-width: 1.4; stroke-dasharray: 4 7; animation: tang_s_dash 1.4s linear infinite; }
+                        @keyframes tang_s_dash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -22; } }
+                        .tang_s_paused .tang_s_flow, .tang_s_paused .tang_s_feedback { animation-play-state: paused; }
+                        .tang_s_layer .tang_s_tag_bg { fill: var(--tang_c_soft); stroke: var(--tang_c); stroke-opacity: .2; stroke-width: 1; }
+                        .tang_s_tag_bar { fill: var(--tang_c); }
+                        .tang_s_tag_no { fill: var(--tang_c); font-size: 10px; font-weight: 700; letter-spacing: 1px; }
+                        .tang_s_tag_name { fill: #233940; font-size: 14.5px; font-weight: 700; }
+                        .tang_s_node { cursor: pointer; transition: transform .18s ease, opacity .2s ease; }
+                        .tang_s_node:hover { transform: translateY(-2px); }
+                        .tang_s_node_box { fill: #ffffff; stroke: rgba(30, 60, 70, .12); stroke-width: 1; transition: fill .18s, stroke .18s, stroke-width .18s; }
+                        .tang_s_node:hover .tang_s_node_box { fill: var(--tang_c_soft); stroke: var(--tang_c); stroke-width: 1.8; }
+                        .tang_s_node_bar { fill: var(--tang_c); opacity: .75; transition: opacity .18s; }
+                        .tang_s_node:hover .tang_s_node_bar { opacity: 1; }
+                        .tang_s_node_title { fill: #25383f; font-size: 14.5px; font-weight: 700; transition: fill .18s; }
+                        .tang_s_node:hover .tang_s_node_title { fill: var(--tang_c); }
+                        .tang_s_node_sub { fill: #74858b; font-size: 11px; }
+                        .tang_s_focus .tang_s_node { opacity: .25; }
+                        .tang_s_focus .tang_s_node.tang_s_loop { opacity: 1; }
+                        .tang_s_focus .tang_s_loop .tang_s_node_box { stroke: var(--tang_c); stroke-width: 2; }
+                        .tang_s_focus .tang_s_loop .tang_s_node_bar { opacity: 1; }
+                        .tang_s_legend_title { fill: #71838a; font-size: 9.5px; font-weight: 700; letter-spacing: 1.4px; }
+                        .tang_s_legend_text { fill: #44575e; font-size: 11.5px; }
+                        .tang_s_legend_note { fill: #8a999f; font-size: 10.5px; }
+                        .tang_s_footer { fill: #9aabb1; font-size: 10px; }
+                    </style>
+                </defs>
+
+                <rect width="1200" height="940" fill="url(#tang_s_bg_grad)"/>
+                <rect width="1200" height="940" fill="url(#tang_s_grid)"/>
+                <ellipse cx="130" cy="70" rx="320" ry="170" fill="#e66a3d" opacity=".045"/>
+                <ellipse cx="1080" cy="880" rx="340" ry="180" fill="#3f8e8c" opacity=".05"/>
+
+                <!-- 标题 -->
+                <g class="tang_s_header">
+                    <rect x="48" y="32" width="44" height="44" rx="12" fill="url(#tang_s_logo_grad)"/>
+                    <text class="tang_s_logo_text" x="70" y="61">图</text>
+                    <text class="tang_s_title" x="108" y="58">基于图像识别的科研系统架构</text>
+                    <text class="tang_s_subtitle" x="108" y="80">IMAGE RECOGNITION RESEARCH SYSTEM ARCHITECTURE · SVG VECTOR</text>
+                    <rect x="962" y="36" width="190" height="32" rx="16" fill="#e8f0f3" stroke="#215a70" stroke-opacity=".12"/>
+                    <text class="tang_s_badge_text" x="1057" y="56">科研方向 · 6 层 · 24 模块</text>
+                </g>
+
+                <!-- 科研闭环 -->
+                <g class="tang_s_loopband">
+                    <rect x="48" y="112" width="1104" height="96" rx="14" fill="#ffffff" fill-opacity=".66" stroke="#1e3c46" stroke-opacity=".08"/>
+                    <text class="tang_s_band_title" x="68" y="147">科研闭环</text>
+                    <text class="tang_s_band_en" x="68" y="165">RESEARCH LOOP</text>
+
+                    <g class="tang_s_stage">
+                        <rect x="180" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="246" y="152"><tspan class="tang_s_stage_no">01</tspan><tspan dx="4">数据采集</tspan></text>
+                    </g>
+                    <path class="tang_s_stage_arrow" d="M317 147 H329" marker-end="url(#tang_s_arrow)"/>
+                    <g class="tang_s_stage">
+                        <rect x="334" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="400" y="152"><tspan class="tang_s_stage_no">02</tspan><tspan dx="4">标注治理</tspan></text>
+                    </g>
+                    <path class="tang_s_stage_arrow" d="M471 147 H483" marker-end="url(#tang_s_arrow)"/>
+                    <g class="tang_s_stage">
+                        <rect x="488" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="554" y="152"><tspan class="tang_s_stage_no">03</tspan><tspan dx="4">模型训练</tspan></text>
+                    </g>
+                    <path class="tang_s_stage_arrow" d="M625 147 H637" marker-end="url(#tang_s_arrow)"/>
+                    <g class="tang_s_stage">
+                        <rect x="642" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="708" y="152"><tspan class="tang_s_stage_no">04</tspan><tspan dx="4">评估解释</tspan></text>
+                    </g>
+                    <path class="tang_s_stage_arrow" d="M779 147 H791" marker-end="url(#tang_s_arrow)"/>
+                    <g class="tang_s_stage">
+                        <rect x="796" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="862" y="152"><tspan class="tang_s_stage_no">05</tspan><tspan dx="4">论文复现</tspan></text>
+                    </g>
+                    <path class="tang_s_stage_arrow" d="M933 147 H945" marker-end="url(#tang_s_arrow)"/>
+                    <g class="tang_s_stage">
+                        <rect x="950" y="130" width="132" height="34" rx="17" fill="#ffffff" stroke="#dbe7ea"/>
+                        <text class="tang_s_stage_text" x="1016" y="152"><tspan class="tang_s_stage_no">06</tspan><tspan dx="4">部署应用</tspan></text>
+                    </g>
+
+                    <path class="tang_s_feedback" d="M1016 164 C1016 188 995 190 970 190 H276 C254 190 246 184 246 168" marker-end="url(#tang_s_arrow)"/>
+                    <rect x="568" y="179" width="132" height="19" rx="9.5" fill="#f8fbfc" stroke="#e1eaed"/>
+                    <text class="tang_s_legend_note" x="634" y="192" text-anchor="middle">实验反馈 · 数据回流</text>
+                </g>
+
+                <!-- 层间链路 -->
+                <g class="tang_s_links">
+                    <path class="tang_s_flow" d="M374 306 V326" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M677 306 V326" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M980 306 V326" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M374 404 V424" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M677 404 V424" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M980 404 V424" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M374 502 V522" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M677 502 V522" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M980 502 V522" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M374 600 V620" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M677 600 V620" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M980 600 V620" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M374 698 V718" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M677 698 V718" marker-end="url(#tang_s_arrow)"/>
+                    <path class="tang_s_flow" d="M980 698 V718" marker-end="url(#tang_s_arrow)"/>
+                </g>
+
+                <!-- 01 数据与标注层 -->
+                <g class="tang_s_layer" style="--tang_c:#e66a3d;--tang_c_soft:#fdeee7">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="236" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="236" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="261">01</text>
+                        <text class="tang_s_tag_name" x="68" y="282">数据与标注层</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="数据与标注层" data-title="多源图像采集" data-desc="对接显微成像、遥感卫星、工业相机与公开数据集，统一登记采集元数据与设备参数。" data-tech="显微成像|遥感影像|工业相机">
+                        <rect class="tang_s_node_box" x="202" y="236" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="252" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="262">多源图像采集</text>
+                        <text class="tang_s_node_sub" x="220" y="281">显微 · 遥感 · 工业相机</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="数据与标注层" data-title="公开数据集接入" data-desc="统一加载 ImageNet、COCO、VisDrone 等公开数据，建立可复用的科研数据索引。" data-tech="ImageNet|COCO|VisDrone">
+                        <rect class="tang_s_node_box" x="443" y="236" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="252" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="262">公开数据集接入</text>
+                        <text class="tang_s_node_sub" x="461" y="281">ImageNet · COCO · 自建库</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="数据与标注层" data-title="标注与质检" data-desc="支持目标框、分割掩码与关键点标注，双人交叉复核并抽检标注一致性。" data-tech="目标框|分割掩码|交叉复核">
+                        <rect class="tang_s_node_box" x="684" y="236" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="252" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="262">标注与质检</text>
+                        <text class="tang_s_node_sub" x="702" y="281">框选 · 分割 · 交叉复核</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="数据与标注层" data-title="数据增强与合成" data-desc="翻转、裁剪、MixUp 与生成式增广，缓解小样本与长尾类别的数据不足。" data-tech="MixUp|生成增广|长尾采样">
+                        <rect class="tang_s_node_box" x="925" y="236" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="252" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="262">数据增强与合成</text>
+                        <text class="tang_s_node_sub" x="943" y="281">翻转 · 裁剪 · 生成增广</text>
+                    </g>
+                </g>
+
+                <!-- 02 训练与计算层 -->
+                <g class="tang_s_layer" style="--tang_c:#d99a3a;--tang_c_soft:#fdf3e2">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="334" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="334" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="359">02</text>
+                        <text class="tang_s_tag_name" x="68" y="380">训练与计算层</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="训练与计算层" data-title="GPU 算力集群" data-desc="多机多卡 GPU 资源池按实验队列调度，支持训练任务排队与优先级管理。" data-tech="A100|资源调度|任务队列">
+                        <rect class="tang_s_node_box" x="202" y="334" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="350" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="360">GPU 算力集群</text>
+                        <text class="tang_s_node_sub" x="220" y="379">A100 · 多卡并行</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="训练与计算层" data-title="分布式训练" data-desc="数据并行、混合精度与梯度累积，显著缩短大规模模型的实验周期。" data-tech="DDP|AMP|ZeRO">
+                        <rect class="tang_s_node_box" x="443" y="334" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="350" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="360">分布式训练</text>
+                        <text class="tang_s_node_sub" x="461" y="379">DDP · 混合精度</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="训练与计算层" data-title="超参数搜索" data-desc="网格搜索、贝叶斯优化与神经架构搜索协同完成模型选型与调参。" data-tech="Grid|Bayesian|NAS">
+                        <rect class="tang_s_node_box" x="684" y="334" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="350" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="360">超参数搜索</text>
+                        <text class="tang_s_node_sub" x="702" y="379">Grid · Bayesian · NAS</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="训练与计算层" data-title="模型压缩与蒸馏" data-desc="剪枝、量化与知识蒸馏，为边缘设备准备精度与速度平衡的轻量模型。" data-tech="剪枝|量化|KD">
+                        <rect class="tang_s_node_box" x="925" y="334" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="350" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="360">模型压缩与蒸馏</text>
+                        <text class="tang_s_node_sub" x="943" y="379">剪枝 · 量化 · KD</text>
+                    </g>
+                </g>
+
+                <!-- 03 算法模型层 -->
+                <g class="tang_s_layer" style="--tang_c:#215a70;--tang_c_soft:#e6eff3">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="432" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="432" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="457">03</text>
+                        <text class="tang_s_tag_name" x="68" y="478">算法模型层</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="算法模型层" data-title="骨干网络" data-desc="对 ResNet、ViT、Swin Transformer 等主干网络做特征提取对比实验。" data-tech="ResNet|ViT|Swin">
+                        <rect class="tang_s_node_box" x="202" y="432" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="448" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="458">骨干网络</text>
+                        <text class="tang_s_node_sub" x="220" y="477">ResNet · ViT · Swin</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="算法模型层" data-title="分类 / 检测 / 分割" data-desc="覆盖图像分类、目标检测与语义分割三类基础视觉任务，统一训练与评测入口。" data-tech="分类|检测|分割">
+                        <rect class="tang_s_node_box" x="443" y="432" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="448" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="458">分类 / 检测 / 分割</text>
+                        <text class="tang_s_node_sub" x="461" y="477">Classify · Detect · Segment</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="算法模型层" data-title="自监督预训练" data-desc="使用 MAE、SimCLR、CLIP 等方法预训练，降低科研任务对人工标注的依赖。" data-tech="MAE|SimCLR|CLIP">
+                        <rect class="tang_s_node_box" x="684" y="432" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="448" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="458">自监督预训练</text>
+                        <text class="tang_s_node_sub" x="702" y="477">MAE · SimCLR · CLIP</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="算法模型层" data-title="多模态融合" data-desc="融合图像与文本、光谱、深度信息，提升复杂科研场景下的识别精度。" data-tech="图文对齐|多光谱|深度融合">
+                        <rect class="tang_s_node_box" x="925" y="432" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="448" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="458">多模态融合</text>
+                        <text class="tang_s_node_sub" x="943" y="477">图文 · 光谱 · 深度融合</text>
+                    </g>
+                </g>
+
+                <!-- 04 评估与解释层 -->
+                <g class="tang_s_layer" style="--tang_c:#3f8e8c;--tang_c_soft:#e6f2f1">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="530" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="530" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="555">04</text>
+                        <text class="tang_s_tag_name" x="68" y="576">评估与解释层</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="评估与解释层" data-title="指标评估" data-desc="统一计算 mAP、IoU、F1、AUC 等指标，并进行显著性检验与置信区间估计。" data-tech="mAP|IoU|F1|AUC">
+                        <rect class="tang_s_node_box" x="202" y="530" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="546" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="556">指标评估</text>
+                        <text class="tang_s_node_sub" x="220" y="575">mAP · IoU · F1 · AUC</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="评估与解释层" data-title="消融与对比实验" data-desc="通过控制变量消融与基线对比，验证各模块对最终指标的实际贡献。" data-tech="消融实验|基线对比">
+                        <rect class="tang_s_node_box" x="443" y="530" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="546" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="556">消融与对比实验</text>
+                        <text class="tang_s_node_sub" x="461" y="575">Ablation · Baseline</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="评估与解释层" data-title="可解释性分析" data-desc="使用 Grad-CAM、SHAP 与注意力可视化解释模型关注区域与决策依据。" data-tech="Grad-CAM|SHAP|注意力">
+                        <rect class="tang_s_node_box" x="684" y="530" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="546" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="556">可解释性分析</text>
+                        <text class="tang_s_node_sub" x="702" y="575">Grad-CAM · SHAP</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="评估与解释层" data-title="鲁棒性与误差分析" data-desc="评估噪声、对抗样本与长尾分布下的稳定性，定位典型错误模式。" data-tech="对抗鲁棒|噪声|长尾">
+                        <rect class="tang_s_node_box" x="925" y="530" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="546" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="556">鲁棒性与误差分析</text>
+                        <text class="tang_s_node_sub" x="943" y="575">噪声 · 对抗 · 长尾</text>
+                    </g>
+                </g>
+
+                <!-- 05 推理与部署层 -->
+                <g class="tang_s_layer" style="--tang_c:#8e6c9c;--tang_c_soft:#f2ecf6">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="628" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="628" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="653">05</text>
+                        <text class="tang_s_tag_name" x="68" y="674">推理与部署层</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="推理与部署层" data-title="模型仓库" data-desc="登记模型版本、评测指标与训练配置，支持实验结果回溯与复现。" data-tech="Model Zoo|版本管理">
+                        <rect class="tang_s_node_box" x="202" y="628" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="644" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="654">模型仓库</text>
+                        <text class="tang_s_node_sub" x="220" y="673">Model Zoo · 版本</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="推理与部署层" data-title="推理服务" data-desc="基于 Triton 与 ONNX Runtime 提供高并发批量推理与模型热更新能力。" data-tech="Triton|ONNX|批处理">
+                        <rect class="tang_s_node_box" x="443" y="628" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="644" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="654">推理服务</text>
+                        <text class="tang_s_node_sub" x="461" y="673">Triton · ONNX Runtime</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="推理与部署层" data-title="边缘端部署" data-desc="将轻量模型部署到 Jetson 等边缘设备，在采集现场完成实时识别。" data-tech="Jetson|轻量化|端侧">
+                        <rect class="tang_s_node_box" x="684" y="628" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="644" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="654">边缘端部署</text>
+                        <text class="tang_s_node_sub" x="702" y="673">Jetson · 轻量化</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="推理与部署层" data-title="开放 API" data-desc="通过 REST 与 gRPC 接口向科研合作方开放识别能力，并做权限与限流控制。" data-tech="REST|gRPC|鉴权">
+                        <rect class="tang_s_node_box" x="925" y="628" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="644" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="654">开放 API</text>
+                        <text class="tang_s_node_sub" x="943" y="673">REST · gRPC · 鉴权</text>
+                    </g>
+                </g>
+
+                <!-- 06 科研支撑层 -->
+                <g class="tang_s_layer" style="--tang_c:#617078;--tang_c_soft:#eef1f3">
+                    <g class="tang_s_tag">
+                        <rect class="tang_s_tag_bg" x="48" y="726" width="136" height="64" rx="12"/>
+                        <rect class="tang_s_tag_bar" x="48" y="726" width="5" height="64" rx="2.5"/>
+                        <text class="tang_s_tag_no" x="68" y="751">06</text>
+                        <text class="tang_s_tag_name" x="68" y="772">科研支撑层</text>
+                    </g>
+                    <g class="tang_s_node tang_s_loop" data-layer="科研支撑层" data-title="实验追踪" data-desc="使用 MLflow 与 TensorBoard 记录参数、指标曲线与训练产物，支撑实验对比。" data-tech="MLflow|TensorBoard">
+                        <rect class="tang_s_node_box" x="202" y="726" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="202" y="742" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="220" y="752">实验追踪</text>
+                        <text class="tang_s_node_sub" x="220" y="771">MLflow · TensorBoard</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="科研支撑层" data-title="数据与代码版本" data-desc="Git 管理代码、DVC 管理数据与模型版本，保证实验过程可复现。" data-tech="Git|DVC|可复现">
+                        <rect class="tang_s_node_box" x="443" y="726" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="443" y="742" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="461" y="752">数据与代码版本</text>
+                        <text class="tang_s_node_sub" x="461" y="771">Git · DVC · 可复现</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="科研支撑层" data-title="可视化平台" data-desc="提供结果看板、标注回放与论文图表导出，支撑组会汇报与论文投稿。" data-tech="看板|标注回放|图表">
+                        <rect class="tang_s_node_box" x="684" y="726" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="684" y="742" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="702" y="752">可视化平台</text>
+                        <text class="tang_s_node_sub" x="702" y="771">看板 · 标注回放 · 图表</text>
+                    </g>
+                    <g class="tang_s_node" data-layer="科研支撑层" data-title="日志与监控" data-desc="Prometheus 采集训练与推理指标，异常即时告警并留存审计日志。" data-tech="Prometheus|告警|审计">
+                        <rect class="tang_s_node_box" x="925" y="726" width="227" height="64" rx="10"/>
+                        <rect class="tang_s_node_bar" x="925" y="742" width="3" height="32" rx="1.5"/>
+                        <text class="tang_s_node_title" x="943" y="752">日志与监控</text>
+                        <text class="tang_s_node_sub" x="943" y="771">Prometheus · 告警 · 审计</text>
+                    </g>
+                </g>
+
+                <!-- 图例 -->
+                <g class="tang_s_legend">
+                    <rect x="48" y="808" width="1104" height="78" rx="12" fill="#ffffff" fill-opacity=".7" stroke="#1e3c46" stroke-opacity=".08"/>
+                    <text class="tang_s_legend_title" x="68" y="830">LAYERS / 分层图例</text>
+                    <circle cx="74" cy="853" r="4.5" fill="#e66a3d"/>
+                    <text class="tang_s_legend_text" x="85" y="857">01 数据与标注层</text>
+                    <circle cx="240" cy="853" r="4.5" fill="#d99a3a"/>
+                    <text class="tang_s_legend_text" x="251" y="857">02 训练与计算层</text>
+                    <circle cx="406" cy="853" r="4.5" fill="#215a70"/>
+                    <text class="tang_s_legend_text" x="417" y="857">03 算法模型层</text>
+                    <circle cx="572" cy="853" r="4.5" fill="#3f8e8c"/>
+                    <text class="tang_s_legend_text" x="583" y="857">04 评估与解释层</text>
+                    <circle cx="738" cy="853" r="4.5" fill="#8e6c9c"/>
+                    <text class="tang_s_legend_text" x="749" y="857">05 推理与部署层</text>
+                    <circle cx="904" cy="853" r="4.5" fill="#617078"/>
+                    <text class="tang_s_legend_text" x="915" y="857">06 科研支撑层</text>
+                    <text class="tang_s_legend_note" x="68" y="875">实线：控制流 · 流动虚线：训练 / 推理流水 · 悬停模块查看职责与关键技术</text>
+                </g>
+
+                <text class="tang_s_footer" x="48" y="916">RESEARCH DIRECTION / IMAGE RECOGNITION</text>
+                <text class="tang_s_footer" x="1152" y="916" text-anchor="end">制图：唐翊斌 · 高级网页设计 · 2026</text>
+            </svg>
+        </div>
+
+        <div class="tang_inspector" id="tang_inspector">
+            <div class="tang_inspector_head">
+                <span class="tang_inspector_layer" id="tang_inspector_layer">悬停任一模块</span>
+                <span class="tang_inspector_no" id="tang_inspector_no">24 MODULES</span>
+            </div>
+            <h3 class="tang_inspector_title" id="tang_inspector_title">查看模块职责与关键技术</h3>
+            <p class="tang_inspector_desc" id="tang_inspector_desc">将鼠标移到上方架构图中的模块，这里会显示它所属的层级、职责说明与关键技术标签。</p>
+            <div class="tang_tags" id="tang_inspector_tags"></div>
+        </div>
+
+        <h2 class="tang_section_title">SVG 实现要点<small>VECTOR · INTERACTION · EXPORT</small></h2>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63e;</i>纯矢量结构</h3>
+                <p>用 rect、path、text 与 viewBox 描述全部图形，缩放不产生锯齿；六个分层 &lt;g&gt; 通过 CSS 变量统一控制配色。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe6bb;</i>交互检视</h3>
+                <p>24 个模块携带 data-layer、data-title、data-desc、data-tech，悬停即可同步到下方检视面板，突出研究链路。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe708;</i>科研闭环</h3>
+                <p>顶部 6 个阶段与回流虚线构成实验闭环；可一键突出闭环节点、暂停流动动画，便于课堂讲解。</p>
+            </div>
+            <div class="tang_card tang_card_wide">
+                <h3><i class="iconfont">&#xe600;</i>核心代码</h3>
+                <code class="tang_code"><em>// 1. viewBox 建立可缩放的矢量坐标系</em>
+&lt;svg viewBox="0 0 1200 940"&gt;
+  &lt;g class="tang_s_layer" style="--tang_c:#e66a3d"&gt; ... &lt;/g&gt;
+&lt;/svg&gt;
+
+<em>// 2. 悬停模块：读取 data-* 更新检视面板</em>
+var tang_g = tang_e.target.closest('.tang_s_node');
+tang_inspector_title.textContent = tang_g.dataset.title;
+
+<em>// 3. 序列化并导出独立 SVG 文件</em>
+var tang_text = new XMLSerializer().serializeToString(tang_svg.cloneNode(true));
+var tang_blob = new Blob([tang_text], { type: 'image/svg+xml' });</code>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · SVG · No CDN</div>
+    </div>
+
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_svg = document.getElementById("tang_svg");
+        var tang_nodes = tang_svg.querySelectorAll(".tang_s_node");
+        var tang_inspector = document.getElementById("tang_inspector");
+        var tang_layer_label = document.getElementById("tang_inspector_layer");
+        var tang_no_label = document.getElementById("tang_inspector_no");
+        var tang_title_label = document.getElementById("tang_inspector_title");
+        var tang_desc_label = document.getElementById("tang_inspector_desc");
+        var tang_tags = document.getElementById("tang_inspector_tags");
+        var tang_btn_anim = document.getElementById("tang_btn_anim");
+        var tang_anim_text = document.getElementById("tang_anim_text");
+        var tang_btn_focus = document.getElementById("tang_btn_focus");
+        var tang_focus_text = document.getElementById("tang_focus_text");
+        var tang_btn_export = document.getElementById("tang_btn_export");
+
+        var tang_active_node = null;
+
+        function tang_pad(n) {
+            return n < 10 ? "0" + n : "" + n;
+        }
+
+        function tang_show_node(node) {
+            var tang_i;
+            var tang_layer;
+            var tang_color;
+            var tang_techs;
+            var tang_index;
+            var tang_chip;
+
+            if (node === tang_active_node) { return; }
+            tang_active_node = node;
+
+            tang_layer = node.parentNode;
+            tang_color = tang_layer.style.getPropertyValue("--tang_c") || "#e66a3d";
+            tang_inspector.style.setProperty("--tang_accent", tang_color);
+            tang_inspector.className = "tang_inspector tang_inspector_on";
+            tang_layer_label.textContent = node.getAttribute("data-layer");
+            tang_index = Array.prototype.indexOf.call(tang_nodes, node) + 1;
+            tang_no_label.textContent = "MODULE " + tang_pad(tang_index) + " / " + tang_nodes.length;
+            tang_title_label.textContent = node.getAttribute("data-title");
+            tang_desc_label.textContent = node.getAttribute("data-desc");
+
+            tang_tags.innerHTML = "";
+            tang_techs = (node.getAttribute("data-tech") || "").split("|");
+            for (tang_i = 0; tang_i < tang_techs.length; tang_i++) {
+                if (!tang_techs[tang_i]) { continue; }
+                tang_chip = document.createElement("span");
+                tang_chip.className = "tang_chip";
+                tang_chip.textContent = tang_techs[tang_i];
+                tang_tags.appendChild(tang_chip);
+            }
+        }
+
+        function tang_reset_node() {
+            tang_active_node = null;
+            tang_inspector.style.removeProperty("--tang_accent");
+            tang_inspector.className = "tang_inspector";
+            tang_layer_label.textContent = "悬停任一模块";
+            tang_no_label.textContent = "24 MODULES";
+            tang_title_label.textContent = "查看模块职责与关键技术";
+            tang_desc_label.textContent = "将鼠标移到上方架构图中的模块，这里会显示它所属的层级、职责说明与关键技术标签。";
+            tang_tags.innerHTML = "";
+        }
+
+        tang_svg.addEventListener("mouseover", function (e) {
+            var tang_node = e.target;
+            while (tang_node && tang_node !== tang_svg) {
+                if (tang_node.classList && tang_node.classList.contains("tang_s_node")) {
+                    tang_show_node(tang_node);
+                    return;
+                }
+                tang_node = tang_node.parentNode;
+            }
+        });
+
+        tang_svg.addEventListener("mouseleave", tang_reset_node);
+
+        tang_btn_anim.addEventListener("click", function () {
+            var tang_paused = tang_svg.classList.toggle("tang_s_paused");
+            tang_anim_text.textContent = tang_paused ? "继续流动动画" : "暂停流动动画";
+        });
+
+        tang_btn_focus.addEventListener("click", function () {
+            var tang_focus = tang_svg.classList.toggle("tang_s_focus");
+            tang_focus_text.textContent = tang_focus ? "取消闭环高亮" : "突出科研闭环";
+        });
+
+        tang_btn_export.addEventListener("click", function () {
+            var tang_clone = tang_svg.cloneNode(true);
+            var tang_text;
+            var tang_blob;
+            var tang_url;
+            var tang_link;
+            tang_clone.classList.remove("tang_s_paused", "tang_s_focus");
+            tang_clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            tang_clone.setAttribute("width", "1200");
+            tang_clone.setAttribute("height", "940");
+            tang_text = new XMLSerializer().serializeToString(tang_clone);
+            tang_blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + tang_text], { type: "image/svg+xml;charset=utf-8" });
+            tang_url = URL.createObjectURL(tang_blob);
+            tang_link = document.createElement("a");
+            tang_link.href = tang_url;
+            tang_link.download = "图像识别科研系统架构.svg";
+            document.body.appendChild(tang_link);
+            tang_link.click();
+            document.body.removeChild(tang_link);
+            setTimeout(function () { URL.revokeObjectURL(tang_url); }, 1200);
+        });
+    })();
+    </script>
+</body>
+</html>

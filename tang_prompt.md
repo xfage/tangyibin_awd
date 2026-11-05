@@ -2,6 +2,12 @@
 
 ---
 
+## 2026-11-05 15:04 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 提交到github
+
+---
+
 ## 2026-11-02 14:37 | Model: GLM-5.3-Flash
 
 **提示词：** 提交到github
@@ -255,3 +261,38 @@
 ## 2026-11-02 16:00 | Model: Hy3
 
 **提示词：** 完成17-6.html，使用promise和async完成异步操作的演示包饺子的流程。先买原料，取原料，买完原料后同时和面，和馅，两个活动都完成之后包饺子，包完饺子吃饺子。使用settimeout模拟每一个流程，如买原料6s，在页面上显示流程。
+
+---
+
+## 2026-11-05 13:33 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 完成18-1.html和18-2.html，第一个显示canvas动画，包括文字唐翊斌。第二个显示基于canvas的全站系统的系统构架图（首都图书馆）。
+
+---
+
+## 2026-11-05 13:44 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 完成18-3.html，其中包括基于图像识别的系统的系统架构图，图的格式为svg，科研方向
+
+---
+
+## 2026-11-05 14:00 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 实现18-4.htm 和18-5.html。其中包括echarts的图：笛卡尔坐标系上的热力图和 从左到右树状图（每个文件中有一个图）cdn文件下载到cdn目录下。示例网址分别为https://echarts.apache.org/examples/zh/editor.html?c=heatmap-cartesian 和 https://echarts.apache.org/examples/zh/editor.html?c=tree-basic
+
+---
+
+## 2026-11-05 14:20 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 实现18-6.html，实现基于mermaid的智能客服系统的流程图和er图，cdn文件下载到cdn目录下
+
+---
+
+## 2026-11-05 14:32 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 实现18-7.html，实现基于three.js的两个图表，cdn文件下载到cdn目录下
+---
+
+## 2026-11-05 14:51 | Model: DeepSeek-V4.1-Flash
+
+**提示词：** 请继续（继续完成 18-8.html：使用 ECharts 与本地中国地图 GeoJSON 制作数据可视化大屏，包含中国地图、指标卡、排行与趋势图表）

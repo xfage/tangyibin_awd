@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-7 three.js 3D 图表｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 14:32，使用模型：DeepSeek-V4.1-Flash，功能名称：基于 three.js 的 3D 柱状图与 3D 曲面图 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 16px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+        .tang_global_bar {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+            margin-bottom: 16px; padding: 12px 16px; border: 1px solid var(--tang_line);
+            border-radius: 12px; background: #fff; box-shadow: var(--tang_shadow);
+        }
+        .tang_status { color: var(--tang_muted); font-size: 13px; }
+        .tang_status_ok { color: var(--tang_teal); }
+        .tang_status_err { color: #b8412f; }
+        .tang_note { margin-left: auto; color: var(--tang_muted); font-size: 12.5px; }
+
+        .tang_chart_card {
+            margin-bottom: 18px; overflow: hidden; border: 1px solid var(--tang_line);
+            border-radius: 16px; background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_chart_head {
+            display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+            padding: 16px 20px; border-bottom: 1px solid var(--tang_line);
+        }
+        .tang_chart_head h2 { font-size: 18px; }
+        .tang_chart_head p { color: var(--tang_muted); font-size: 12.5px; }
+        .tang_tools { display: flex; flex-wrap: wrap; gap: 8px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px;
+            border: 1px solid var(--tang_line); border-radius: 8px; background: #fff;
+            color: var(--tang_blue); font-family: inherit; font-size: 13px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #eef3f6; }
+        .tang_btn_primary { background: var(--tang_orange); border-color: var(--tang_orange); color: #fff; }
+        .tang_btn_primary:hover { background: #cf5a2f; }
+
+        .tang_viewport {
+            position: relative; height: 470px; overflow: hidden;
+            background: radial-gradient(circle at 50% 35%, #12313b 0%, #0a1e26 60%, #07161d 100%);
+            cursor: grab; touch-action: none;
+        }
+        .tang_viewport:active { cursor: grabbing; }
+        .tang_viewport canvas { display: block; width: 100%; height: 100%; }
+        .tang_tooltip {
+            position: absolute; z-index: 3; pointer-events: none; opacity: 0;
+            padding: 8px 12px; border: 1px solid rgba(150, 210, 210, .25); border-radius: 8px;
+            background: rgba(13, 32, 40, .94); color: #eaf5f5; font-size: 12px;
+            white-space: nowrap; transition: opacity .15s ease;
+        }
+        .tang_hud {
+            position: absolute; right: 16px; bottom: 14px; z-index: 2; pointer-events: none;
+            color: rgba(190, 225, 225, .55); font-size: 12px; letter-spacing: .5px;
+        }
+        .tang_err { padding: 40px; color: #ffb8a6; font-size: 14px; text-align: center; }
+        .tang_legend {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+            padding: 12px 20px; border-top: 1px solid var(--tang_line);
+            color: var(--tang_muted); font-size: 12px;
+        }
+        .tang_gradient {
+            width: 180px; height: 9px; border-radius: 20px;
+            background: linear-gradient(90deg, #3f8e8c, #f5c977, #e66a3d);
+        }
+
+        .tang_section_title { margin: 34px 0 16px; font-size: 20px; }
+        .tang_section_title small { margin-left: 10px; color: var(--tang_muted); font-size: 12px; font-weight: 400; letter-spacing: 1px; }
+        .tang_grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tang_card {
+            padding: 20px 22px; border: 1px solid var(--tang_line); border-radius: 14px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 16px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_card p { color: var(--tang_muted); font-size: 13px; }
+        .tang_card p code {
+            padding: 1px 5px; border-radius: 4px; background: #f1f5f8;
+            font-family: Consolas, "Courier New", monospace; font-size: 12px; color: var(--tang_blue);
+        }
+        .tang_card_wide { grid-column: 1 / -1; }
+        .tang_code {
+            display: block; margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 30px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: 1fr; } }
+        @media (max-width: 620px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 21px; }
+            .tang_viewport { height: 380px; }
+            .tang_note { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe63e;</i></div>
+            <div>
+                <h1>three.js 三维数据图表</h1>
+                <p>3D 柱状图 + 3D 曲面图 · 两个独立 WebGL 场景</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>说明：</b>three.js 已下载到 <code>cdn/three.min.js</code>（r149 UMD 构建），本页只做本地引用，不访问在线 CDN。
+            两张图由 <code>Scene / PerspectiveCamera / WebGLRenderer</code> 构建，共用一个 <code>requestAnimationFrame</code> 动画循环；
+            中文坐标标签用 <code>CanvasTexture + Sprite</code> 绘制，拖拽旋转、滚轮缩放与悬停取值为原生实现。
+        </div>
+
+        <div class="tang_global_bar">
+            <span class="tang_status" id="tang_status">正在初始化 WebGL 场景…</span>
+            <span class="tang_note">拖拽旋转 · 滚轮缩放 · 悬停查看数值</span>
+        </div>
+
+        <div class="tang_chart_card">
+            <div class="tang_chart_head">
+                <div>
+                    <h2>一、3D 柱状图：各类资源月度借阅量</h2>
+                    <p>6 个月 × 4 类资源 = 24 根柱体 · 高度与颜色同时表示借阅人次</p>
+                </div>
+                <div class="tang_tools">
+                    <button class="tang_btn tang_btn_primary" id="tang_btn_bar_data" type="button"><i class="iconfont">&#xe6bb;</i>重新生成数据</button>
+                    <button class="tang_btn" id="tang_btn_bar_spin" type="button"><i class="iconfont">&#xe63b;</i><span id="tang_bar_spin_text">暂停旋转</span></button>
+                    <button class="tang_btn" id="tang_btn_bar_reset" type="button"><i class="iconfont">&#xe64c;</i>重置视角</button>
+                </div>
+            </div>
+            <div class="tang_viewport" id="tang_view_bar">
+                <div class="tang_tooltip" id="tang_tip_bar"></div>
+                <div class="tang_hud">拖拽旋转 · 滚轮缩放 · 悬停柱体查看借阅量</div>
+            </div>
+            <div class="tang_legend">
+                <span>借阅量</span><span>低</span><span class="tang_gradient"></span><span>高</span>
+                <span>· 柱体由 0 生长到目标高度，材质为 MeshLambertMaterial</span>
+            </div>
+        </div>
+
+        <div class="tang_chart_card">
+            <div class="tang_chart_head">
+                <div>
+                    <h2>二、3D 曲面图：一周读者活跃度</h2>
+                    <p>24 小时 × 7 天 · 与 18-4 热力图同源数据，PlaneGeometry 顶点位移生成曲面</p>
+                </div>
+                <div class="tang_tools">
+                    <button class="tang_btn tang_btn_primary" id="tang_btn_surf_wire" type="button"><i class="iconfont">&#xe6bb;</i><span id="tang_surf_wire_text">隐藏网格线</span></button>
+                    <button class="tang_btn" id="tang_btn_surf_spin" type="button"><i class="iconfont">&#xe63b;</i><span id="tang_surf_spin_text">暂停旋转</span></button>
+                    <button class="tang_btn" id="tang_btn_surf_reset" type="button"><i class="iconfont">&#xe64c;</i>重置视角</button>
+                </div>
+            </div>
+            <div class="tang_viewport" id="tang_view_surf">
+                <div class="tang_tooltip" id="tang_tip_surf"></div>
+                <div class="tang_hud">拖拽旋转 · 滚轮缩放 · 悬停曲面查看活跃度</div>
+            </div>
+            <div class="tang_legend">
+                <span>活跃度</span><span>低</span><span class="tang_gradient"></span><span>高</span>
+                <span>· vertexColors 按高度着色，WireframeGeometry 叠加网格线</span>
+            </div>
+        </div>
+
+        <h2 class="tang_section_title">three.js 实现要点<small>SCENE · GEOMETRY · INTERACTION</small></h2>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63e;</i>场景三要素</h3>
+                <p>每个图表各有 <code>Scene</code>、<code>PerspectiveCamera</code>、<code>WebGLRenderer</code>；环境光加两盏方向光，动画循环里统一调用 <code>render()</code>。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe6bb;</i>几何与材质</h3>
+                <p>柱体由 <code>BoxGeometry</code> 缩放 Y 轴生成；曲面由 <code>PlaneGeometry</code> 逐顶点改高度、<code>computeVertexNormals()</code> 后按高度设置顶点颜色。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe600;</i>中文与交互</h3>
+                <p><code>CanvasTexture</code> 画中文再贴到 <code>Sprite</code>；自写轨道相机实现拖拽 / 缩放，<code>Raycaster</code> 命中柱体与曲面后显示数值提示。</p>
+            </div>
+            <div class="tang_card tang_card_wide">
+                <h3><i class="iconfont">&#xe600;</i>核心代码</h3>
+                <code class="tang_code"><em>// 1. 本地引入 three.js UMD 构建</em>
+&lt;script src="cdn/three.min.js"&gt;&lt;/script&gt;
+
+<em>// 2. 场景、相机、渲染器</em>
+var tang_scene = new THREE.Scene();
+var tang_camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 200);
+var tang_renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+tang_scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+
+<em>// 3. 柱体：缩放 Y 轴并放在地面上</em>
+var tang_bar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1, 0.8),
+    new THREE.MeshLambertMaterial({ color: 0x3f8e8c }));
+tang_bar.scale.y = tang_h;
+tang_bar.position.y = tang_h / 2;
+
+<em>// 4. 曲面：逐顶点改高度与颜色</em>
+var tang_geo = new THREE.PlaneGeometry(12, 4.2, 23, 6);
+tang_geo.rotateX(-Math.PI / 2);
+tang_geo.attributes.position.setY(tang_index, tang_value / 100 * 3.2);
+tang_geo.setAttribute('color', new THREE.Float32BufferAttribute(tang_colors, 3));
+tang_geo.computeVertexNormals();
+
+<em>// 5. 每帧渲染两个场景</em>
+requestAnimationFrame(function tang_loop() {
+    tang_bar_view.render(); tang_surf_view.render();
+    requestAnimationFrame(tang_loop);
+});</code>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · three.js r149 本地化 · No CDN</div>
+    </div>
+
+    <script src="cdn/three.min.js"></script>
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_status = document.getElementById("tang_status");
+        var tang_box_bar = document.getElementById("tang_view_bar");
+        var tang_box_surf = document.getElementById("tang_view_surf");
+        var tang_tip_bar = document.getElementById("tang_tip_bar");
+        var tang_tip_surf = document.getElementById("tang_tip_surf");
+
+        if (!window.THREE) {
+            tang_status.className = "tang_status tang_status_err";
+            tang_status.textContent = "未能加载 cdn/three.min.js";
+            tang_box_bar.innerHTML = '<div class="tang_err">请确认 three.js 已下载到 cdn 目录。</div>';
+            tang_box_surf.innerHTML = '<div class="tang_err">请确认 three.js 已下载到 cdn 目录。</div>';
+            return;
+        }
+
+        var tang_THREE = window.THREE;
+        var tang_hours = [];
+        var tang_days = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
+        var tang_months = ["1月", "2月", "3月", "4月", "5月", "6月"];
+        var tang_categories = ["图书", "期刊", "音像", "数字资源"];
+        var tang_i;
+        var tang_bar_view = null;
+        var tang_surf_view = null;
+        var tang_bar_meshes = [];
+        var tang_bar_hovered = null;
+        var tang_surface_mesh = null;
+        var tang_surface_wire = null;
+        var tang_bar_random = false;
+
+        for (tang_i = 0; tang_i < 24; tang_i++) {
+            tang_hours.push((tang_i < 10 ? "0" : "") + tang_i + ":00");
+        }
+
+        function tang_value_color(v) {
+            var tang_t = Math.max(0, Math.min(1, v / 100));
+            var tang_a = new tang_THREE.Color(0x3f8e8c);
+            var tang_b = new tang_THREE.Color(0xf5c977);
+            var tang_c = new tang_THREE.Color(0xe66a3d);
+            if (tang_t < 0.5) { return tang_a.lerp(tang_b, tang_t * 2); }
+            return tang_b.lerp(tang_c, (tang_t - 0.5) * 2);
+        }
+
+        function tang_surface_value(hi, di) {
+            var tang_base = 6 +
+                60 * Math.exp(-Math.pow(hi - 10, 2) / 10) +
+                52 * Math.exp(-Math.pow(hi - 15, 2) / 14);
+            if (di >= 5) { tang_base *= 1.25; }
+            if (hi < 7 || hi > 21) { tang_base *= 0.18; }
+            tang_base += 9 * Math.sin(hi * 0.85 + di * 1.6);
+            return Math.max(0, Math.min(100, Math.round(tang_base)));
+        }
+
+        function tang_make_label(text, color, w, h) {
+            var tang_canvas = document.createElement("canvas");
+            var tang_ctx;
+            var tang_tex;
+            var tang_mat;
+            var tang_sprite;
+            tang_canvas.width = 256;
+            tang_canvas.height = 64;
+            tang_ctx = tang_canvas.getContext("2d");
+            tang_ctx.clearRect(0, 0, 256, 64);
+            tang_ctx.font = '600 32px "Microsoft YaHei", "PingFang SC", sans-serif';
+            tang_ctx.textAlign = "center";
+            tang_ctx.textBaseline = "middle";
+            tang_ctx.fillStyle = color || "#cfe6e8";
+            tang_ctx.fillText(text, 128, 34);
+            tang_tex = new tang_THREE.CanvasTexture(tang_canvas);
+            tang_mat = new tang_THREE.SpriteMaterial({ map: tang_tex, transparent: true, depthTest: false, depthWrite: false });
+            tang_sprite = new tang_THREE.Sprite(tang_mat);
+            tang_sprite.scale.set(w || 1.5, h || 0.38, 1);
+            return tang_sprite;
+        }
+
+        function tang_show_tip(el, text, e, box) {
+            var tang_rect = box.getBoundingClientRect();
+            var tang_x = e.clientX - tang_rect.left + 14;
+            var tang_y = e.clientY - tang_rect.top - 42;
+            if (tang_x > tang_rect.width - 220) { tang_x = e.clientX - tang_rect.left - 210; }
+            if (tang_y < 6) { tang_y = 6; }
+            el.textContent = text;
+            el.style.left = tang_x + "px";
+            el.style.top = tang_y + "px";
+            el.style.opacity = "1";
+        }
+
+        function tang_hide_tip(el) {
+            el.style.opacity = "0";
+        }
+
+        function tang_create_view(box, cfg) {
+            var tang_scene = new tang_THREE.Scene();
+            var tang_camera = new tang_THREE.PerspectiveCamera(45, 1, 0.1, 200);
+            var tang_renderer = new tang_THREE.WebGLRenderer({ antialias: true, alpha: true });
+            var tang_state = {
+                theta: cfg.theta, phi: cfg.phi, radius: cfg.radius, targetY: cfg.targetY,
+                defTheta: cfg.theta, defPhi: cfg.phi, defRadius: cfg.radius,
+                spin: true, dragging: false, lastX: 0, lastY: 0
+            };
+            var tang_ray = new tang_THREE.Raycaster();
+            var tang_ndc = new tang_THREE.Vector2();
+            var tang_key;
+            var tang_fill;
+
+            tang_scene.fog = new tang_THREE.Fog(0x0b2028, 18, 48);
+            tang_renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+            tang_renderer.setClearColor(0x000000, 0);
+            tang_renderer.domElement.style.display = "block";
+            tang_renderer.domElement.style.width = "100%";
+            tang_renderer.domElement.style.height = "100%";
+            box.appendChild(tang_renderer.domElement);
+
+            tang_scene.add(new tang_THREE.AmbientLight(0xffffff, 0.72));
+            tang_key = new tang_THREE.DirectionalLight(0xffffff, 0.8);
+            tang_key.position.set(9, 14, 11);
+            tang_scene.add(tang_key);
+            tang_fill = new tang_THREE.DirectionalLight(0x7fd6d0, 0.35);
+            tang_fill.position.set(-10, 6, -9);
+            tang_scene.add(tang_fill);
+
+            function tang_apply() {
+                var tang_sp = Math.sin(tang_state.phi);
+                tang_camera.position.set(
+                    tang_state.radius * tang_sp * Math.sin(tang_state.theta),
+                    tang_state.radius * Math.cos(tang_state.phi) + tang_state.targetY,
+                    tang_state.radius * tang_sp * Math.cos(tang_state.theta)
+                );
+                tang_camera.lookAt(0, tang_state.targetY, 0);
+            }
+
+            function tang_resize() {
+                var tang_w = box.clientWidth;
+                var tang_h = box.clientHeight;
+                if (!tang_w || !tang_h) { return; }
+                tang_camera.aspect = tang_w / tang_h;
+                tang_camera.updateProjectionMatrix();
+                tang_renderer.setSize(tang_w, tang_h, false);
+            }
+
+            function tang_reset() {
+                tang_state.theta = tang_state.defTheta;
+                tang_state.phi = tang_state.defPhi;
+                tang_state.radius = tang_state.defRadius;
+                tang_apply();
+            }
+
+            box.addEventListener("pointerdown", function (e) {
+                tang_state.dragging = true;
+                tang_state.lastX = e.clientX;
+                tang_state.lastY = e.clientY;
+                if (box.setPointerCapture) { box.setPointerCapture(e.pointerId); }
+            });
+
+            box.addEventListener("pointermove", function (e) {
+                var tang_rect;
+                if (tang_state.dragging) {
+                    tang_state.theta -= (e.clientX - tang_state.lastX) * 0.006;
+                    tang_state.phi -= (e.clientY - tang_state.lastY) * 0.005;
+                    tang_state.phi = Math.max(0.18, Math.min(1.45, tang_state.phi));
+                    tang_state.lastX = e.clientX;
+                    tang_state.lastY = e.clientY;
+                    tang_apply();
+                }
+                tang_rect = tang_renderer.domElement.getBoundingClientRect();
+                tang_ndc.set(
+                    ((e.clientX - tang_rect.left) / tang_rect.width) * 2 - 1,
+                    -((e.clientY - tang_rect.top) / tang_rect.height) * 2 + 1
+                );
+                if (cfg.onMove) { cfg.onMove(e, tang_ndc, tang_ray, tang_camera); }
+            });
+
+            function tang_end_drag() { tang_state.dragging = false; }
+            box.addEventListener("pointerup", tang_end_drag);
+            box.addEventListener("pointercancel", tang_end_drag);
+            box.addEventListener("pointerleave", function () {
+                tang_end_drag();
+                if (cfg.onLeave) { cfg.onLeave(); }
+            });
+
+            box.addEventListener("wheel", function (e) {
+                e.preventDefault();
+                tang_state.radius = Math.max(cfg.minRadius, Math.min(cfg.maxRadius, tang_state.radius + e.deltaY * 0.012));
+                tang_apply();
+            }, { passive: false });
+
+            if (window.ResizeObserver) {
+                new ResizeObserver(tang_resize).observe(box);
+            } else {
+                window.addEventListener("resize", tang_resize);
+            }
+
+            tang_apply();
+            tang_resize();
+
+            return {
+                scene: tang_scene,
+                camera: tang_camera,
+                renderer: tang_renderer,
+                state: tang_state,
+                apply: tang_apply,
+                resize: tang_resize,
+                reset: tang_reset,
+                render: function () { tang_renderer.render(tang_scene, tang_camera); }
+            };
+        }
+
+        function tang_add_line(scene, points, color) {
+            var tang_geo = new tang_THREE.BufferGeometry().setFromPoints(points);
+            scene.add(new tang_THREE.Line(tang_geo, new tang_THREE.LineBasicMaterial({ color: color })));
+        }
+
+        function tang_build_bar_scene() {
+            var tang_scene = tang_bar_view.scene;
+            var tang_floor;
+            var tang_grid;
+            var tang_label;
+            var tang_x;
+            var tang_z;
+            var tang_y;
+            var tang_k;
+            var tang_origin = new tang_THREE.Vector3(-4.9, 0, -3.0);
+
+            tang_floor = new tang_THREE.Mesh(
+                new tang_THREE.PlaneGeometry(12, 12),
+                new tang_THREE.MeshBasicMaterial({ color: 0x0d2831, transparent: true, opacity: 0.55, side: tang_THREE.DoubleSide })
+            );
+            tang_floor.rotateX(-Math.PI / 2);
+            tang_floor.position.y = -0.03;
+            tang_scene.add(tang_floor);
+
+            tang_grid = new tang_THREE.GridHelper(12, 12, 0x3c7079, 0x22454e);
+            tang_grid.position.y = 0;
+            tang_scene.add(tang_grid);
+
+            tang_add_line(tang_scene, [tang_origin, new tang_THREE.Vector3(-4.9, 5.3, -3.0)], 0x9cc4ca);
+            tang_add_line(tang_scene, [tang_origin, new tang_THREE.Vector3(4.4, 0, -3.0)], 0x9cc4ca);
+            tang_add_line(tang_scene, [tang_origin, new tang_THREE.Vector3(-4.9, 0, 2.9)], 0x9cc4ca);
+
+            for (tang_k = 0; tang_k < tang_months.length; tang_k++) {
+                tang_x = (tang_k - 2.5) * 1.5;
+                tang_label = tang_make_label(tang_months[tang_k], "#cfe6e8", 1.35, 0.4);
+                tang_label.position.set(tang_x, 0.24, 3.05);
+                tang_scene.add(tang_label);
+            }
+            for (tang_k = 0; tang_k < tang_categories.length; tang_k++) {
+                tang_z = (tang_k - 1.5) * 1.5;
+                tang_label = tang_make_label(tang_categories[tang_k], "#a9d8d3", 2.1, 0.44);
+                tang_label.position.set(-5.75, 0.24, tang_z);
+                tang_scene.add(tang_label);
+            }
+            for (tang_k = 0; tang_k <= 4; tang_k++) {
+                tang_y = tang_k * 1.25;
+                tang_label = tang_make_label(String(tang_k * 25), "#9fc4c9", 1.0, 0.32);
+                tang_label.position.set(-5.35, tang_y, -3.0);
+                tang_scene.add(tang_label);
+            }
+            tang_label = tang_make_label("借阅量 / 人次", "#ffd0ac", 2.4, 0.5);
+            tang_label.position.set(-5.4, 5.45, -3.0);
+            tang_scene.add(tang_label);
+        }
+
+        function tang_bar_data_value(mi, ci, random) {
+            var tang_v = 18 + 26 * Math.sin(mi * 0.85 + ci * 1.3) + ci * 7 + mi * 3;
+            if (random) { tang_v += (Math.random() - 0.5) * 40; }
+            return Math.max(5, Math.min(100, Math.round(tang_v)));
+        }
+
+        function tang_build_bars() {
+            var tang_mi;
+            var tang_ci;
+            var tang_v;
+            var tang_h;
+            var tang_mesh;
+            var tang_j;
+            for (tang_j = 0; tang_j < tang_bar_meshes.length; tang_j++) {
+                tang_mesh = tang_bar_meshes[tang_j];
+                tang_bar_view.scene.remove(tang_mesh);
+                tang_mesh.geometry.dispose();
+                tang_mesh.material.dispose();
+            }
+            tang_bar_meshes = [];
+            tang_bar_hovered = null;
+            tang_hide_tip(tang_tip_bar);
+
+            for (tang_ci = 0; tang_ci < tang_categories.length; tang_ci++) {
+                for (tang_mi = 0; tang_mi < tang_months.length; tang_mi++) {
+                    tang_v = tang_bar_data_value(tang_mi, tang_ci, tang_bar_random);
+                    tang_h = tang_v / 100 * 5;
+                    tang_mesh = new tang_THREE.Mesh(
+                        new tang_THREE.BoxGeometry(0.8, 1, 0.8),
+                        new tang_THREE.MeshLambertMaterial({ color: tang_value_color(tang_v), emissive: 0x000000 })
+                    );
+                    tang_mesh.position.set((tang_mi - 2.5) * 1.5, 0.01, (tang_ci - 1.5) * 1.5);
+                    tang_mesh.scale.y = 0.02;
+                    tang_mesh.userData = {
+                        targetH: tang_h,
+                        month: tang_months[tang_mi],
+                        category: tang_categories[tang_ci],
+                        value: tang_v
+                    };
+                    tang_bar_view.scene.add(tang_mesh);
+                    tang_bar_meshes.push(tang_mesh);
+                }
+            }
+        }
+
+        function tang_bar_hover(e, ndc, ray, camera) {
+            var tang_hits;
+            var tang_mesh;
+            var tang_info;
+            if (tang_bar_meshes.length === 0) { return; }
+            ray.setFromCamera(ndc, camera);
+            tang_hits = ray.intersectObjects(tang_bar_meshes, false);
+            if (tang_hits.length) {
+                tang_mesh = tang_hits[0].object;
+                if (tang_bar_hovered && tang_bar_hovered !== tang_mesh) {
+                    tang_bar_hovered.material.emissive.setHex(0x000000);
+                }
+                tang_bar_hovered = tang_mesh;
+                tang_mesh.material.emissive.setHex(0x3c5a60);
+                tang_info = tang_mesh.userData;
+                tang_show_tip(tang_tip_bar,
+                    tang_info.category + " · " + tang_info.month + "：" + tang_info.value + " 人次",
+                    e, tang_box_bar);
+            } else {
+                if (tang_bar_hovered) {
+                    tang_bar_hovered.material.emissive.setHex(0x000000);
+                    tang_bar_hovered = null;
+                }
+                tang_hide_tip(tang_tip_bar);
+            }
+        }
+
+        function tang_bar_leave() {
+            if (tang_bar_hovered) {
+                tang_bar_hovered.material.emissive.setHex(0x000000);
+                tang_bar_hovered = null;
+            }
+            tang_hide_tip(tang_tip_bar);
+        }
+
+        function tang_build_surface_scene() {
+            var tang_scene = tang_surf_view.scene;
+            var tang_geo;
+            var tang_pos;
+            var tang_colors = [];
+            var tang_color;
+            var tang_ix;
+            var tang_iz;
+            var tang_idx;
+            var tang_v;
+            var tang_material;
+            var tang_floor;
+            var tang_grid;
+            var tang_label;
+            var tang_k;
+            var tang_hour_idx = [0, 4, 8, 12, 16, 20, 23];
+
+            tang_floor = new tang_THREE.Mesh(
+                new tang_THREE.PlaneGeometry(15, 9),
+                new tang_THREE.MeshBasicMaterial({ color: 0x0d2831, transparent: true, opacity: 0.6, side: tang_THREE.DoubleSide })
+            );
+            tang_floor.rotateX(-Math.PI / 2);
+            tang_floor.position.y = -0.04;
+            tang_scene.add(tang_floor);
+
+            tang_grid = new tang_THREE.GridHelper(14, 14, 0x3c7079, 0x22454e);
+            tang_grid.position.y = 0;
+            tang_scene.add(tang_grid);
+
+            tang_geo = new tang_THREE.PlaneGeometry(12, 4.2, 23, 6);
+            tang_geo.rotateX(-Math.PI / 2);
+            tang_pos = tang_geo.attributes.position;
+            for (tang_iz = 0; tang_iz <= 6; tang_iz++) {
+                for (tang_ix = 0; tang_ix <= 23; tang_ix++) {
+                    tang_idx = tang_iz * 24 + tang_ix;
+                    tang_v = tang_surface_value(tang_ix, tang_iz);
+                    tang_pos.setY(tang_idx, 0.06 + tang_v / 100 * 3.2);
+                    tang_color = tang_value_color(tang_v);
+                    tang_colors.push(tang_color.r, tang_color.g, tang_color.b);
+                }
+            }
+            tang_pos.needsUpdate = true;
+            tang_geo.setAttribute("color", new tang_THREE.Float32BufferAttribute(tang_colors, 3));
+            tang_geo.computeVertexNormals();
+
+            tang_material = new tang_THREE.MeshLambertMaterial({
+                vertexColors: true, side: tang_THREE.DoubleSide, transparent: true, opacity: 0.96
+            });
+            tang_surface_mesh = new tang_THREE.Mesh(tang_geo, tang_material);
+            tang_scene.add(tang_surface_mesh);
+
+            tang_surface_wire = new tang_THREE.LineSegments(
+                new tang_THREE.WireframeGeometry(tang_geo),
+                new tang_THREE.LineBasicMaterial({ color: 0x8fd0d4, transparent: true, opacity: 0.32 })
+            );
+            tang_scene.add(tang_surface_wire);
+
+            tang_add_line(tang_scene, [
+                new tang_THREE.Vector3(-6.3, 0, -2.4),
+                new tang_THREE.Vector3(-6.3, 3.5, -2.4)
+            ], 0x9cc4ca);
+            tang_add_line(tang_scene, [
+                new tang_THREE.Vector3(-6.3, 0, -2.4),
+                new tang_THREE.Vector3(6.2, 0, -2.4)
+            ], 0x9cc4ca);
+            tang_add_line(tang_scene, [
+                new tang_THREE.Vector3(-6.3, 0, -2.4),
+                new tang_THREE.Vector3(-6.3, 0, 2.8)
+            ], 0x9cc4ca);
+
+            for (tang_k = 0; tang_k < tang_hour_idx.length; tang_k++) {
+                tang_ix = tang_hour_idx[tang_k];
+                tang_label = tang_make_label(tang_hours[tang_ix], "#cfe6e8", 1.7, 0.42);
+                tang_label.position.set(-6 + tang_ix / 23 * 12, 0.3, 3.35);
+                tang_scene.add(tang_label);
+            }
+            for (tang_k = 0; tang_k < tang_days.length; tang_k++) {
+                tang_label = tang_make_label(tang_days[tang_k], "#a9d8d3", 1.5, 0.4);
+                tang_label.position.set(-7.2, 0.3, -2.1 + tang_k / 6 * 4.2);
+                tang_scene.add(tang_label);
+            }
+            for (tang_k = 0; tang_k <= 2; tang_k++) {
+                tang_label = tang_make_label(String(tang_k * 50), "#9fc4c9", 1.0, 0.32);
+                tang_label.position.set(-7.0, tang_k * 1.6, -2.4);
+                tang_scene.add(tang_label);
+            }
+            tang_label = tang_make_label("活跃度 / 人次", "#ffd0ac", 2.4, 0.5);
+            tang_label.position.set(-6.9, 4.1, -2.4);
+            tang_scene.add(tang_label);
+        }
+
+        function tang_surface_hover(e, ndc, ray, camera) {
+            var tang_hits;
+            var tang_point;
+            var tang_ix;
+            var tang_iz;
+            if (!tang_surface_mesh) { return; }
+            ray.setFromCamera(ndc, camera);
+            tang_hits = ray.intersectObject(tang_surface_mesh, false);
+            if (tang_hits.length) {
+                tang_point = tang_hits[0].point;
+                tang_ix = Math.max(0, Math.min(23, Math.round((tang_point.x + 6) / 12 * 23)));
+                tang_iz = Math.max(0, Math.min(6, Math.round((tang_point.z + 2.1) / 4.2 * 6)));
+                tang_show_tip(tang_tip_surf,
+                    tang_days[tang_iz] + " " + tang_hours[tang_ix] + "：活跃度 " + tang_surface_value(tang_ix, tang_iz),
+                    e, tang_box_surf);
+            } else {
+                tang_hide_tip(tang_tip_surf);
+            }
+        }
+
+        try {
+            tang_bar_view = tang_create_view(tang_box_bar, {
+                theta: 0.72, phi: 0.76, radius: 16.5, targetY: 1.6,
+                minRadius: 9, maxRadius: 30,
+                onMove: tang_bar_hover, onLeave: tang_bar_leave
+            });
+            tang_surf_view = tang_create_view(tang_box_surf, {
+                theta: 0.62, phi: 0.80, radius: 16.5, targetY: 1.1,
+                minRadius: 9, maxRadius: 30,
+                onMove: tang_surface_hover, onLeave: function () { tang_hide_tip(tang_tip_surf); }
+            });
+        } catch (err) {
+            tang_status.className = "tang_status tang_status_err";
+            tang_status.textContent = "WebGL 初始化失败：" + err.message;
+            tang_box_bar.innerHTML = '<div class="tang_err">当前浏览器无法创建 WebGL 上下文，请换用支持 WebGL 的浏览器。</div>';
+            tang_box_surf.innerHTML = '<div class="tang_err">当前浏览器无法创建 WebGL 上下文，请换用支持 WebGL 的浏览器。</div>';
+            return;
+        }
+
+        tang_build_bar_scene();
+        tang_build_bars();
+        tang_build_surface_scene();
+
+        tang_status.className = "tang_status tang_status_ok";
+        tang_status.textContent = "2 个 WebGL 场景已就绪 · 共用一个动画循环";
+
+        function tang_toggle_spin(view, label) {
+            view.state.spin = !view.state.spin;
+            label.textContent = view.state.spin ? "暂停旋转" : "继续旋转";
+        }
+
+        document.getElementById("tang_btn_bar_data").addEventListener("click", function () {
+            tang_bar_random = true;
+            tang_build_bars();
+        });
+        document.getElementById("tang_btn_bar_spin").addEventListener("click", function () {
+            tang_toggle_spin(tang_bar_view, document.getElementById("tang_bar_spin_text"));
+        });
+        document.getElementById("tang_btn_bar_reset").addEventListener("click", tang_bar_view.reset);
+        document.getElementById("tang_btn_surf_wire").addEventListener("click", function () {
+            tang_surface_wire.visible = !tang_surface_wire.visible;
+            document.getElementById("tang_surf_wire_text").textContent = tang_surface_wire.visible ? "隐藏网格线" : "显示网格线";
+        });
+        document.getElementById("tang_btn_surf_spin").addEventListener("click", function () {
+            tang_toggle_spin(tang_surf_view, document.getElementById("tang_surf_spin_text"));
+        });
+        document.getElementById("tang_btn_surf_reset").addEventListener("click", tang_surf_view.reset);
+
+        function tang_loop() {
+            requestAnimationFrame(tang_loop);
+            if (tang_bar_view.state.spin) {
+                tang_bar_view.state.theta += 0.0022;
+                tang_bar_view.apply();
+            }
+            if (tang_surf_view.state.spin) {
+                tang_surf_view.state.theta += 0.0015;
+                tang_surf_view.apply();
+            }
+            for (tang_i = 0; tang_i < tang_bar_meshes.length; tang_i++) {
+                var tang_mesh = tang_bar_meshes[tang_i];
+                tang_mesh.scale.y += (tang_mesh.userData.targetH - tang_mesh.scale.y) * 0.09;
+                tang_mesh.position.y = tang_mesh.scale.y / 2;
+            }
+            tang_bar_view.render();
+            tang_surf_view.render();
+        }
+        tang_loop();
+    })();
+    </script>
+</body>
+</html>

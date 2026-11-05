@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-4 ECharts 笛卡尔坐标系热力图｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 14:00，使用模型：DeepSeek-V4.1-Flash，功能名称：ECharts 笛卡尔坐标系热力图 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 22px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .tang_toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border: 1px solid transparent; border-radius: 8px; background: var(--tang_orange);
+            color: #fff; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn_ghost { background: #fff; color: var(--tang_blue); border-color: var(--tang_line); }
+        .tang_btn_ghost:hover { background: #eef3f6; }
+        .tang_note { margin-left: auto; color: var(--tang_muted); font-size: 13px; }
+
+        .tang_chart_card {
+            overflow: hidden; border: 1px solid var(--tang_line); border-radius: 16px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_chart_head {
+            display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; justify-content: space-between;
+            padding: 18px 22px; border-bottom: 1px solid var(--tang_line);
+        }
+        .tang_chart_head h2 { font-size: 18px; }
+        .tang_chart_head p { color: var(--tang_muted); font-size: 12.5px; }
+        .tang_chart_wrap { padding: 10px; overflow-x: auto; }
+        .tang_chart { width: 100%; min-width: 720px; height: 560px; }
+        .tang_err { padding: 40px; color: #b8412f; font-size: 14px; text-align: center; }
+
+        .tang_stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+        .tang_stat {
+            padding: 16px 20px; border: 1px solid var(--tang_line); border-radius: 12px;
+            background: #fff; box-shadow: var(--tang_shadow);
+        }
+        .tang_stat span { display: block; color: var(--tang_muted); font-size: 12px; letter-spacing: 1px; }
+        .tang_stat b { display: block; margin-top: 4px; color: var(--tang_blue); font-size: 21px; }
+        .tang_stat small { color: var(--tang_muted); font-size: 12px; font-weight: 400; }
+
+        .tang_section_title { margin: 38px 0 16px; font-size: 20px; }
+        .tang_section_title small { margin-left: 10px; color: var(--tang_muted); font-size: 12px; font-weight: 400; letter-spacing: 1px; }
+        .tang_grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tang_card {
+            padding: 20px 22px; border: 1px solid var(--tang_line); border-radius: 14px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 16px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_card p { color: var(--tang_muted); font-size: 13px; }
+        .tang_card p code {
+            padding: 1px 5px; border-radius: 4px; background: #f1f5f8;
+            font-family: Consolas, "Courier New", monospace; font-size: 12px; color: var(--tang_blue);
+        }
+        .tang_card_wide { grid-column: 1 / -1; }
+        .tang_code {
+            display: block; margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 30px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: 1fr; } }
+        @media (max-width: 620px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 21px; }
+            .tang_stats { grid-template-columns: 1fr; }
+            .tang_note { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe63e;</i></div>
+            <div>
+                <h1>ECharts 笛卡尔坐标系热力图</h1>
+                <p>官方示例 heatmap-cartesian · 类目轴 + 连续型视觉映射</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>说明：</b>ECharts 库已下载到 <code>cdn/echarts.min.js</code>，本页只做本地引用，不访问在线 CDN。
+            热力图把「星期 × 小时」作为两个 <code>category</code> 类目轴，每个格子的数据为
+            <code>[x 索引, y 索引, 数值]</code>；<code>visualMap</code> 负责把数值映射成颜色。
+        </div>
+
+        <div class="tang_toolbar">
+            <button class="tang_btn" id="tang_btn_data" type="button"><i class="iconfont">&#xe6bb;</i>重新生成数据</button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_label" type="button"><i class="iconfont">&#xe63e;</i><span id="tang_label_text">隐藏数值</span></button>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_color" type="button"><i class="iconfont">&#xe600;</i>切换配色</button>
+            <span class="tang_note">ECharts 5.6.0 本地文件 · 单图表页面</span>
+        </div>
+
+        <div class="tang_chart_card">
+            <div class="tang_chart_head">
+                <h2>一周 24 小时读者访问热度</h2>
+                <p id="tang_chart_meta">单位：人次 / 小时 · 配色：青橙 · 可拖动色条筛选区间</p>
+            </div>
+            <div class="tang_chart_wrap">
+                <div class="tang_chart" id="tang_heatmap"></div>
+            </div>
+        </div>
+
+        <div class="tang_stats">
+            <div class="tang_stat">
+                <span>TOTAL / 一周累计访问</span>
+                <b id="tang_stat_sum">--</b>
+                <small>全部 168 个时段求和</small>
+            </div>
+            <div class="tang_stat">
+                <span>PEAK / 峰值时段</span>
+                <b id="tang_stat_peak">--</b>
+                <small>热度最高的小时</small>
+            </div>
+            <div class="tang_stat">
+                <span>AVERAGE / 平均热度</span>
+                <b id="tang_stat_avg">--</b>
+                <small>单位：人次 / 小时</small>
+            </div>
+        </div>
+
+        <h2 class="tang_section_title">实现要点<small>CARTESIAN HEATMAP</small></h2>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63e;</i>笛卡尔坐标系</h3>
+                <p>x 轴为 24 个小时、y 轴为周一到周日，二者都是 <code>type: 'category'</code> 类目轴；<code>splitArea</code> 让网格更易读。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe6bb;</i>visualMap 映射</h3>
+                <p>连续型 <code>visualMap</code> 把 0–100 的数值映射为渐变色，<code>calculable: true</code> 时拖动两端手柄可筛选数据区间。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe600;</i>交互与自适应</h3>
+                <p><code>tooltip</code> 显示精确数值；按钮控制数据、标签和配色；窗口尺寸变化时调用 <code>chart.resize()</code> 重排。</p>
+            </div>
+            <div class="tang_card tang_card_wide">
+                <h3><i class="iconfont">&#xe600;</i>核心代码</h3>
+                <code class="tang_code"><em>// 1. 本地引入 ECharts，初始化图表实例</em>
+&lt;script src="cdn/echarts.min.js"&gt;&lt;/script&gt;
+var tang_chart = window.echarts.init(document.getElementById('tang_heatmap'));
+
+<em>// 2. 热力图数据：[x 索引, y 索引, 数值]</em>
+var tang_data = [[0, 0, 12], [1, 0, 8], ...];
+
+<em>// 3. 配置类目轴、视觉映射与热力图系列</em>
+tang_chart.setOption({
+    xAxis: { type: 'category', data: tang_hours },
+    yAxis: { type: 'category', data: tang_days },
+    visualMap: { min: 0, max: 100, calculable: true, orient: 'horizontal' },
+    series: [{ type: 'heatmap', data: tang_data, label: { show: true } }]
+});
+window.addEventListener('resize', function () { tang_chart.resize(); });</code>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · ECharts 5.6.0 本地化 · No CDN</div>
+    </div>
+
+    <script src="cdn/echarts.min.js"></script>
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_box = document.getElementById("tang_heatmap");
+        if (!window.echarts) {
+            tang_box.className = "tang_err";
+            tang_box.textContent = "未能加载 cdn/echarts.min.js，请确认该文件已下载到 cdn 目录。";
+            return;
+        }
+
+        var tang_echarts = window.echarts;
+        var tang_chart = tang_echarts.init(tang_box);
+        var tang_hours = [];
+        var tang_days = ["周日", "周六", "周五", "周四", "周三", "周二", "周一"];
+        var tang_palettes = [
+            { name: "青橙", colors: ["#eef7f5", "#9fd8ca", "#f5c977", "#e66a3d"] },
+            { name: "蓝紫", colors: ["#eef3fa", "#a9c6ee", "#7b86d5", "#3f467f"] },
+            { name: "金红", colors: ["#fff8e9", "#ffd9a1", "#f19a5a", "#b8412f"] }
+        ];
+        var tang_palette_index = 0;
+        var tang_show_label = true;
+        var tang_data = [];
+        var tang_i;
+        var tang_chart_meta = document.getElementById("tang_chart_meta");
+
+        for (tang_i = 0; tang_i < 24; tang_i++) {
+            tang_hours.push((tang_i < 10 ? "0" : "") + tang_i + ":00");
+        }
+
+        function tang_build_data(tang_random) {
+            var tang_list = [];
+            var tang_h;
+            var tang_d;
+            var tang_base;
+            var tang_value;
+            for (tang_h = 0; tang_h < 24; tang_h++) {
+                for (tang_d = 0; tang_d < 7; tang_d++) {
+                    tang_base = 6 +
+                        60 * Math.exp(-Math.pow(tang_h - 10, 2) / 10) +
+                        52 * Math.exp(-Math.pow(tang_h - 15, 2) / 14);
+                    if (tang_d <= 1) { tang_base *= 1.25; }
+                    if (tang_h < 7 || tang_h > 21) { tang_base *= 0.18; }
+                    tang_base += 9 * Math.sin(tang_h * 0.85 + tang_d * 1.6);
+                    if (tang_random) { tang_base += (Math.random() - 0.5) * 34; }
+                    tang_value = Math.max(0, Math.min(100, Math.round(tang_base)));
+                    tang_list.push([tang_h, tang_d, tang_value]);
+                }
+            }
+            return tang_list;
+        }
+
+        function tang_update_stats() {
+            var tang_sum = 0;
+            var tang_max = -1;
+            var tang_peak = "--";
+            var tang_k;
+            var tang_item;
+            for (tang_k = 0; tang_k < tang_data.length; tang_k++) {
+                tang_item = tang_data[tang_k];
+                tang_sum += tang_item[2];
+                if (tang_item[2] > tang_max) {
+                    tang_max = tang_item[2];
+                    tang_peak = tang_days[tang_item[1]] + " " + tang_hours[tang_item[0]];
+                }
+            }
+            document.getElementById("tang_stat_sum").textContent = tang_sum.toLocaleString("zh-CN") + " 人次";
+            document.getElementById("tang_stat_peak").textContent = tang_peak;
+            document.getElementById("tang_stat_avg").textContent = Math.round(tang_sum / tang_data.length) + " 人次";
+        }
+
+        function tang_option() {
+            return {
+                textStyle: { fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif' },
+                animationDuration: 600,
+                tooltip: {
+                    position: "top",
+                    backgroundColor: "rgba(20,36,43,.92)",
+                    borderWidth: 0,
+                    textStyle: { color: "#f2f8f8", fontSize: 12 },
+                    formatter: function (p) {
+                        return "<b>" + tang_days[p.value[1]] + " " + tang_hours[p.value[0]] + "</b><br/>访问热度：" + p.value[2] + " 人次";
+                    }
+                },
+                grid: { left: 64, right: 26, top: 18, bottom: 100 },
+                xAxis: {
+                    type: "category",
+                    data: tang_hours,
+                    splitArea: { show: true, areaStyle: { color: ["rgba(33,90,112,.025)", "transparent"] } },
+                    axisLine: { lineStyle: { color: "#c9d6db" } },
+                    axisTick: { show: false },
+                    axisLabel: { color: "#617078", fontSize: 10, interval: 0, rotate: 45 }
+                },
+                yAxis: {
+                    type: "category",
+                    data: tang_days,
+                    splitArea: { show: true, areaStyle: { color: ["rgba(33,90,112,.025)", "transparent"] } },
+                    axisLine: { show: false },
+                    axisTick: { show: false },
+                    axisLabel: { color: "#617078", fontSize: 12 }
+                },
+                visualMap: {
+                    min: 0,
+                    max: 100,
+                    calculable: true,
+                    orient: "horizontal",
+                    left: "center",
+                    bottom: 14,
+                    itemWidth: 14,
+                    itemHeight: 260,
+                    text: ["高", "低"],
+                    textStyle: { color: "#617078", fontSize: 11 },
+                    inRange: { color: tang_palettes[tang_palette_index].colors }
+                },
+                series: [{
+                    name: "读者访问热度",
+                    type: "heatmap",
+                    data: tang_data,
+                    label: {
+                        show: tang_show_label,
+                        color: "#25424a",
+                        fontSize: 10,
+                        formatter: function (p) { return p.value[2]; }
+                    },
+                    itemStyle: { borderColor: "#ffffff", borderWidth: 1 },
+                    emphasis: { itemStyle: { shadowBlur: 10, shadowColor: "rgba(0,0,0,.35)" } }
+                }]
+            };
+        }
+
+        function tang_update_meta() {
+            tang_chart_meta.textContent = "单位：人次 / 小时 · 配色：" + tang_palettes[tang_palette_index].name +
+                " · 数值标签" + (tang_show_label ? "开启" : "关闭") + " · 可拖动色条筛选区间";
+        }
+
+        function tang_render() {
+            tang_chart.setOption(tang_option(), true);
+            tang_update_stats();
+            tang_update_meta();
+        }
+
+        document.getElementById("tang_btn_data").addEventListener("click", function () {
+            tang_data = tang_build_data(true);
+            tang_render();
+        });
+
+        document.getElementById("tang_btn_label").addEventListener("click", function () {
+            tang_show_label = !tang_show_label;
+            document.getElementById("tang_label_text").textContent = tang_show_label ? "隐藏数值" : "显示数值";
+            tang_render();
+        });
+
+        document.getElementById("tang_btn_color").addEventListener("click", function () {
+            tang_palette_index = (tang_palette_index + 1) % tang_palettes.length;
+            tang_render();
+        });
+
+        window.addEventListener("resize", function () { tang_chart.resize(); });
+
+        tang_data = tang_build_data(false);
+        tang_render();
+    })();
+    </script>
+</body>
+</html>

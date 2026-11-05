@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-6 Mermaid 智能客服系统流程图与 ER 图｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 14:20，使用模型：DeepSeek-V4.1-Flash，功能名称：基于 Mermaid 绘制智能客服系统的业务流程图与实体关系图 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_ink: #17232b;
+            --tang_muted: #617078;
+            --tang_paper: #f4f7fa;
+            --tang_card: #ffffff;
+            --tang_line: #e1e7ee;
+            --tang_orange: #e66a3d;
+            --tang_blue: #215a70;
+            --tang_teal: #3f8e8c;
+            --tang_shadow: 0 14px 34px rgba(28, 39, 43, .08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_ink);
+            background: var(--tang_paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.65;
+        }
+        .tang_shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 30px 0 60px; }
+        .tang_head { display: flex; align-items: center; gap: 16px; }
+        .tang_logo {
+            display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px;
+            color: #fff; font-size: 26px; background: linear-gradient(135deg, var(--tang_orange), var(--tang_blue));
+            box-shadow: var(--tang_shadow);
+        }
+        .tang_head h1 { font-size: 28px; }
+        .tang_head p { color: var(--tang_muted); font-size: 14px; }
+        .tang_tip {
+            margin: 18px 0 22px; padding: 14px 18px; border-radius: 10px;
+            background: #fdeee7; border-left: 4px solid var(--tang_orange); font-size: 14px;
+        }
+        .tang_tip code {
+            padding: 1px 6px; border-radius: 5px; background: #fbe3d8;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .tang_toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+        .tang_btn {
+            display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px;
+            border: 1px solid transparent; border-radius: 8px; background: var(--tang_orange);
+            color: #fff; font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_btn:hover { background: #cf5a2f; }
+        .tang_btn_ghost { background: #fff; color: var(--tang_blue); border-color: var(--tang_line); }
+        .tang_btn_ghost:hover { background: #eef3f6; }
+        .tang_btn_small { padding: 7px 13px; font-size: 13px; }
+        .tang_select {
+            padding: 9px 32px 9px 14px; border: 1px solid var(--tang_line); border-radius: 8px;
+            background: #fff; color: var(--tang_blue); font-family: inherit; font-size: 14px; cursor: pointer;
+        }
+        .tang_status { margin-left: auto; color: var(--tang_muted); font-size: 13px; }
+        .tang_status_ok { color: var(--tang_teal); }
+        .tang_status_err { color: #b8412f; }
+
+        .tang_chart_card {
+            margin-bottom: 18px; overflow: hidden; border: 1px solid var(--tang_line);
+            border-radius: 16px; background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_chart_head {
+            display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+            padding: 18px 22px; border-bottom: 1px solid var(--tang_line);
+        }
+        .tang_chart_head h2 { font-size: 18px; }
+        .tang_chart_head p { color: var(--tang_muted); font-size: 12.5px; }
+        .tang_chart_wrap { padding: 16px; overflow-x: auto; background: #fbfdfe; }
+        .tang_mermaid { min-height: 120px; color: var(--tang_muted); font-family: Consolas, monospace; font-size: 12px; }
+        .tang_mermaid_wide { min-width: 1000px; }
+        .tang_mermaid svg { width: 100% !important; height: auto !important; max-width: 100% !important; }
+        .tang_err { padding: 26px; color: #b8412f; font-size: 14px; text-align: center; }
+
+        .tang_entity_legend {
+            display: flex; flex-wrap: wrap; gap: 8px; padding: 0 22px 20px;
+        }
+        .tang_chip { padding: 3px 11px; border-radius: 20px; background: #eef4f6; color: #3c5a63; font-size: 12px; }
+        .tang_chip b { color: var(--tang_blue); font-family: Consolas, monospace; font-weight: 400; }
+
+        .tang_section_title { margin: 38px 0 16px; font-size: 20px; }
+        .tang_section_title small { margin-left: 10px; color: var(--tang_muted); font-size: 12px; font-weight: 400; letter-spacing: 1px; }
+        .tang_grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .tang_card {
+            padding: 20px 22px; border: 1px solid var(--tang_line); border-radius: 14px;
+            background: var(--tang_card); box-shadow: var(--tang_shadow);
+        }
+        .tang_card h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 16px; }
+        .tang_card h3 i { color: var(--tang_orange); }
+        .tang_card p { color: var(--tang_muted); font-size: 13px; }
+        .tang_card p code {
+            padding: 1px 5px; border-radius: 4px; background: #f1f5f8;
+            font-family: Consolas, "Courier New", monospace; font-size: 12px; color: var(--tang_blue);
+        }
+        .tang_card_wide { grid-column: 1 / -1; }
+        .tang_code {
+            display: block; margin-top: 12px; padding: 14px 16px; border-radius: 10px;
+            overflow-x: auto; background: #22323a; color: #eaf3f4; white-space: pre;
+            font-family: Consolas, "Courier New", monospace; font-size: 12.5px; line-height: 1.7;
+        }
+        .tang_code em { color: #8fd6c9; font-style: normal; }
+
+        .tang_back { display: inline-block; margin-top: 30px; color: var(--tang_orange); font-size: 15px; text-decoration: none; }
+        .tang_back:hover { text-decoration: underline; }
+        .tang_foot { margin-top: 18px; color: var(--tang_muted); font-size: 12px; }
+
+        @media (max-width: 900px) { .tang_grid { grid-template-columns: 1fr; } }
+        @media (max-width: 620px) {
+            .tang_shell { width: calc(100% - 28px); }
+            .tang_head h1 { font-size: 21px; }
+            .tang_status { width: 100%; margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="tang_shell">
+        <div class="tang_head">
+            <div class="tang_logo"><i class="iconfont">&#xe708;</i></div>
+            <div>
+                <h1>智能客服系统 · Mermaid 流程图与 ER 图</h1>
+                <p>用文本描述业务流转与数据实体，本地渲染为 SVG</p>
+            </div>
+        </div>
+
+        <div class="tang_tip">
+            <b>说明：</b>Mermaid 库已下载到 <code>cdn/mermaid.min.js</code>，本页只做本地引用，不访问在线 CDN。
+            两张图分别用 <code>flowchart TD</code> 与 <code>erDiagram</code> 书写，由 <code>mermaid.run()</code> 渲染成 SVG；
+            可切换主题、重新渲染，并单独导出每张图的 SVG 文件。
+        </div>
+
+        <div class="tang_toolbar">
+            <select class="tang_select" id="tang_theme">
+                <option value="default">主题：默认</option>
+                <option value="forest">主题：森林</option>
+                <option value="neutral">主题：中性</option>
+                <option value="base">主题：基础</option>
+            </select>
+            <button class="tang_btn tang_btn_ghost" id="tang_btn_render" type="button"><i class="iconfont">&#xe64c;</i>重新渲染</button>
+            <span class="tang_status" id="tang_status">准备中…</span>
+        </div>
+
+        <div class="tang_chart_card">
+            <div class="tang_chart_head">
+                <div>
+                    <h2>一、智能客服系统业务流程图</h2>
+                    <p>flowchart TD · 接入层 → 对话理解层 → 服务与回复层 → 数据回流</p>
+                </div>
+                <button class="tang_btn tang_btn_ghost tang_btn_small" id="tang_btn_export_flow" type="button">
+                    <i class="iconfont">&#xe63e;</i>导出 SVG
+                </button>
+            </div>
+            <div class="tang_chart_wrap">
+                <div class="tang_mermaid" id="tang_flow">flowchart TD
+    U([用户发送消息]) --> CH{接入渠道}
+    CH -->|网页 / App| GW[API 网关]
+    CH -->|微信 / 小程序| AD[渠道适配器]
+    GW --> AUTH[统一身份认证]
+    AD --> AUTH
+    AUTH --> SESSION[会话上下文管理]
+    SESSION --> NLU[意图识别与槽位抽取]
+    NLU --> ROUTE{意图与置信度路由}
+    ROUTE -->|FAQ 咨询| FAQ[知识库检索]
+    ROUTE -->|业务办理| BIZ[业务系统接口]
+    ROUTE -->|低置信度 / 投诉| HUMAN[转人工坐席]
+    FAQ --> RANK[答案排序与生成]
+    BIZ --> RANK
+    RANK --> CHECK{答案是否可信}
+    CHECK -->|是| REPLY[生成回复并发送]
+    CHECK -->|否| HUMAN
+    HUMAN --> AGENT[人工客服工作台]
+    AGENT --> REPLY
+    REPLY --> USER([用户收到答复])
+    REPLY --> LOG[(会话日志与标注)]
+    LOG -.->|回流训练| NLU</div>
+            </div>
+        </div>
+
+        <div class="tang_chart_card">
+            <div class="tang_chart_head">
+                <div>
+                    <h2>二、智能客服系统实体关系图（ER）</h2>
+                    <p>erDiagram · 用户、会话、消息、意图、知识库、回复、坐席与日志</p>
+                </div>
+                <button class="tang_btn tang_btn_ghost tang_btn_small" id="tang_btn_export_er" type="button">
+                    <i class="iconfont">&#xe63e;</i>导出 SVG
+                </button>
+            </div>
+            <div class="tang_chart_wrap">
+                <div class="tang_mermaid tang_mermaid_wide" id="tang_er">erDiagram
+    CUSTOMER ||--o{ CONVERSATION : initiates
+    CONVERSATION ||--|{ MESSAGE : contains
+    CONVERSATION ||--o{ REPLY : receives
+    MESSAGE }o--|| INTENT : detects
+    INTENT ||--o{ FAQ : matches
+    KNOWLEDGE_BASE ||--|{ FAQ : includes
+    AGENT ||--o{ REPLY : writes
+    FAQ ||--o{ REPLY : supports
+    MESSAGE ||--o{ LOG : produces
+
+    CUSTOMER {
+        string customer_id PK "用户编号"
+        string nickname "昵称"
+        string channel "来源渠道"
+    }
+    CONVERSATION {
+        string session_id PK "会话编号"
+        string customer_id FK "用户编号"
+        datetime started_at "开始时间"
+        string status "会话状态"
+    }
+    MESSAGE {
+        bigint message_id PK "消息编号"
+        string session_id FK "会话编号"
+        string role "发送方"
+        text content "消息正文"
+    }
+    INTENT {
+        string intent_code PK "意图编码"
+        string intent_name "意图名称"
+        float confidence "置信度"
+    }
+    FAQ {
+        string faq_id PK "条目编号"
+        string kb_id FK "知识库编号"
+        string question "标准问法"
+        string answer "标准答案"
+    }
+    KNOWLEDGE_BASE {
+        string kb_id PK "知识库编号"
+        string name "知识库名称"
+        string version "版本号"
+    }
+    REPLY {
+        bigint reply_id PK "回复编号"
+        string session_id FK "会话编号"
+        string source "回复来源"
+        text content "回复内容"
+    }
+    AGENT {
+        string agent_id PK "坐席编号"
+        string group_name "技能组"
+        string status "在线状态"
+    }
+    LOG {
+        bigint log_id PK "日志编号"
+        bigint message_id FK "消息编号"
+        datetime created_at "记录时间"
+    }</div>
+            </div>
+            <div class="tang_entity_legend">
+                <span class="tang_chip"><b>CUSTOMER</b> 用户</span>
+                <span class="tang_chip"><b>CONVERSATION</b> 会话</span>
+                <span class="tang_chip"><b>MESSAGE</b> 消息</span>
+                <span class="tang_chip"><b>INTENT</b> 意图</span>
+                <span class="tang_chip"><b>FAQ</b> 知识条目</span>
+                <span class="tang_chip"><b>KNOWLEDGE_BASE</b> 知识库</span>
+                <span class="tang_chip"><b>REPLY</b> 回复</span>
+                <span class="tang_chip"><b>AGENT</b> 人工坐席</span>
+                <span class="tang_chip"><b>LOG</b> 会话日志</span>
+            </div>
+        </div>
+
+        <h2 class="tang_section_title">Mermaid 语法要点<small>FLOWCHART · ER DIAGRAM</small></h2>
+        <div class="tang_grid">
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe63e;</i>流程图形状</h3>
+                <p><code>([ ])</code> 起止、<code>[ ]</code> 处理、<code>{ }</code> 判断、<code>[( )]</code> 数据存储；<code>--&gt;</code> 实线流程、<code>-.-></code> 虚线回流、<code>|文字|</code> 分支说明。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe6bb;</i>ER 基数符号</h3>
+                <p><code>||--o{</code> 一对多、<code>||--|{</code> 一对至少一、<code>}o--||</code> 零或多对一；实体属性可标注 <code>PK / FK</code>。</p>
+            </div>
+            <div class="tang_card">
+                <h3><i class="iconfont">&#xe600;</i>本地渲染</h3>
+                <p><code>mermaid.initialize()</code> 设置主题，<code>mermaid.run({ nodes })</code> 把文本节点替换成 SVG；重新渲染前需移除 <code>data-processed</code>。</p>
+            </div>
+            <div class="tang_card tang_card_wide">
+                <h3><i class="iconfont">&#xe600;</i>核心代码</h3>
+                <code class="tang_code"><em>// 1. 本地引入 Mermaid UMD 构建</em>
+&lt;script src="cdn/mermaid.min.js"&gt;&lt;/script&gt;
+
+<em>// 2. 初始化并渲染两个文本节点</em>
+mermaid.initialize({ startOnLoad: false, theme: 'default' });
+mermaid.run({ nodes: [tang_flow, tang_er] });
+
+<em>// 3. Mermaid 源文本示例</em>
+flowchart TD
+    U([用户发送消息]) --> CH{接入渠道}
+    CH -->|网页 / App| GW[API 网关]
+
+erDiagram
+    CUSTOMER ||--o{ CONVERSATION : initiates
+    CONVERSATION ||--|{ MESSAGE : contains</code>
+            </div>
+        </div>
+
+        <a class="tang_back" href="index.html">← 返回首页</a>
+        <div class="tang_foot">唐翊斌 · 高级网页设计课堂实践 · Mermaid 10.9.3 本地化 · No CDN</div>
+    </div>
+
+    <script src="cdn/mermaid.min.js"></script>
+    <script>
+    (function () {
+        "use strict";
+
+        var tang_status = document.getElementById("tang_status");
+        var tang_flow = document.getElementById("tang_flow");
+        var tang_er = document.getElementById("tang_er");
+        var tang_nodes = [tang_flow, tang_er];
+        var tang_sources = [tang_flow.textContent, tang_er.textContent];
+        var tang_theme = document.getElementById("tang_theme");
+
+        if (!window.mermaid) {
+            tang_status.className = "tang_status tang_status_err";
+            tang_status.textContent = "未能加载 cdn/mermaid.min.js";
+            tang_flow.className = "tang_err";
+            tang_flow.textContent = "请确认 Mermaid 库已下载到 cdn 目录。";
+            tang_er.textContent = "";
+            return;
+        }
+
+        var tang_mermaid = window.mermaid;
+
+        function tang_set_status(text, state) {
+            tang_status.textContent = text;
+            tang_status.className = "tang_status" + (state ? " tang_status_" + state : "");
+        }
+
+        function tang_render() {
+            var tang_i;
+            tang_mermaid.initialize({
+                startOnLoad: false,
+                theme: tang_theme.value,
+                securityLevel: "strict",
+                themeVariables: { fontFamily: '"Microsoft YaHei", "PingFang SC", sans-serif' },
+                flowchart: { curve: "linear", htmlLabels: true },
+                er: { useMaxWidth: false }
+            });
+
+            for (tang_i = 0; tang_i < tang_nodes.length; tang_i++) {
+                tang_nodes[tang_i].removeAttribute("data-processed");
+                tang_nodes[tang_i].innerHTML = "";
+                tang_nodes[tang_i].textContent = tang_sources[tang_i];
+            }
+
+            tang_set_status("正在渲染…", "");
+            try {
+                Promise.resolve(tang_mermaid.run({ nodes: tang_nodes })).then(function () {
+                    tang_set_status("渲染完成 · 流程图 + ER 图", "ok");
+                }).catch(function (err) {
+                    tang_set_status("渲染失败：" + (err && err.message ? err.message : "未知错误"), "err");
+                });
+            } catch (err) {
+                tang_set_status("渲染失败：" + err.message, "err");
+            }
+        }
+
+        function tang_export_svg(node, filename) {
+            var tang_svg = node.querySelector("svg");
+            var tang_clone;
+            var tang_text;
+            var tang_blob;
+            var tang_url;
+            var tang_link;
+            if (!tang_svg) {
+                tang_set_status("图表尚未渲染完成，请稍后再导出", "err");
+                return;
+            }
+            tang_clone = tang_svg.cloneNode(true);
+            tang_clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            tang_text = new XMLSerializer().serializeToString(tang_clone);
+            tang_blob = new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n' + tang_text], { type: "image/svg+xml;charset=utf-8" });
+            tang_url = URL.createObjectURL(tang_blob);
+            tang_link = document.createElement("a");
+            tang_link.href = tang_url;
+            tang_link.download = filename;
+            document.body.appendChild(tang_link);
+            tang_link.click();
+            document.body.removeChild(tang_link);
+            setTimeout(function () { URL.revokeObjectURL(tang_url); }, 1200);
+            tang_set_status("已导出 " + filename, "ok");
+        }
+
+        document.getElementById("tang_btn_render").addEventListener("click", tang_render);
+        tang_theme.addEventListener("change", tang_render);
+        document.getElementById("tang_btn_export_flow").addEventListener("click", function () {
+            tang_export_svg(tang_flow, "智能客服系统流程图.svg");
+        });
+        document.getElementById("tang_btn_export_er").addEventListener("click", function () {
+            tang_export_svg(tang_er, "智能客服系统ER图.svg");
+        });
+
+        tang_render();
+    })();
+    </script>
+</body>
+</html>

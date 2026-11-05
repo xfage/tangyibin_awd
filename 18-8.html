@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18-8 中国地图数据大屏｜唐翊斌</title>
+    <!-- 作者：唐翊斌，建立时间：2026-11-05 14:51，使用模型：DeepSeek-V4.1-Flash，功能名称：基于 ECharts 与本地中国地图数据的数据可视化大屏 -->
+    <link rel="stylesheet" href="fonts/iconfont.css">
+    <style>
+        :root {
+            --tang_bg: #050d16;
+            --tang_panel: rgba(11, 29, 44, .82);
+            --tang_line: rgba(90, 214, 207, .22);
+            --tang_line_soft: rgba(90, 214, 207, .12);
+            --tang_cyan: #39e0c6;
+            --tang_blue: #4aa8ff;
+            --tang_gold: #f7c86b;
+            --tang_text: #dceaf2;
+            --tang_muted: #7d9db0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            color: var(--tang_text);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            background:
+                radial-gradient(1100px 620px at 50% -12%, rgba(45, 140, 170, .30), transparent 66%),
+                radial-gradient(900px 520px at 4% 94%, rgba(26, 116, 138, .20), transparent 70%),
+                linear-gradient(180deg, var(--tang_bg), #040a12 62%, #050d16);
+            background-attachment: fixed;
+        }
+        body::before {
+            content: "";
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image:
+                linear-gradient(rgba(70, 190, 200, .045) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(70, 190, 200, .045) 1px, transparent 1px);
+            background-size: 46px 46px;
+            mask-image: radial-gradient(circle at 50% 42%, #000 30%, transparent 82%);
+            -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 30%, transparent 82%);
+        }
+        a { color: inherit; text-decoration: none; }
+
+        .tang_screen {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; gap: 12px;
+            min-height: 100vh; padding: 14px clamp(10px, 1.6vw, 24px) 14px;
+        }
+
+        /* 顶部标题栏 */
+        .tang_top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+        .tang_tag {
+            display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+            border: 1px solid var(--tang_line); border-radius: 999px;
+            color: var(--tang_muted); font-size: 11.5px; letter-spacing: .08em;
+        }
+        .tang_tag i { color: var(--tang_cyan); font-size: 12px; }
+        .tang_title { position: relative; text-align: center; padding-bottom: 10px; }
+        .tang_title h1 {
+            font-size: clamp(18px, 2.05vw, 28px); font-weight: 600; letter-spacing: .2em;
+            background: linear-gradient(180deg, #f4feff, #6fdbe4 68%, #2f9db6);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            text-shadow: 0 0 26px rgba(70, 210, 220, .18);
+        }
+        .tang_title p { margin-top: 5px; color: var(--tang_muted); font-size: 11px; letter-spacing: .34em; }
+        .tang_title::after {
+            content: ""; position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+            width: min(460px, 74vw); height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(90, 214, 207, .75), transparent);
+        }
+        .tang_top_right { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+        .tang_clock { color: var(--tang_text); font-family: Consolas, monospace; font-size: 13px; letter-spacing: .06em; }
+        .tang_clock small { display: block; color: var(--tang_muted); font-size: 10.5px; letter-spacing: .12em; text-align: right; }
+        .tang_back {
+            display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px;
+            border: 1px solid var(--tang_line); border-radius: 6px;
+            color: var(--tang_cyan); font-size: 12px; transition: all .22s ease;
+        }
+        .tang_back:hover { background: rgba(57, 224, 198, .12); box-shadow: 0 0 16px rgba(57, 224, 198, .2); }
+
+        /* 主体三栏 */
+        .tang_layout {
+            flex: 1; min-height: 0;
+            display: grid; gap: 12px;
+            grid-template-columns: minmax(252px, .9fr) minmax(420px, 1.66fr) minmax(252px, .9fr);
+        }
+        .tang_col { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+        .tang_panel {
+            position: relative; display: flex; flex-direction: column;
+            padding: 10px 12px 12px; border: 1px solid var(--tang_line); border-radius: 10px;
+            background: var(--tang_panel);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .38), inset 0 0 40px rgba(30, 140, 160, .07);
+            backdrop-filter: blur(4px);
+        }
+        .tang_panel::before,
+        .tang_panel::after {
+            content: ""; position: absolute; width: 12px; height: 12px; pointer-events: none;
+        }
+        .tang_panel::before { left: -1px; top: -1px; border-left: 2px solid var(--tang_cyan); border-top: 2px solid var(--tang_cyan); border-radius: 10px 0 0 0; }
+        .tang_panel::after { right: -1px; bottom: -1px; border-right: 2px solid var(--tang_cyan); border-bottom: 2px solid var(--tang_cyan); border-radius: 0 0 10px 0; }
+
+        .tang_panel_head {
+            display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            padding-bottom: 7px; border-bottom: 1px dashed var(--tang_line_soft);
+        }
+        .tang_panel_head h2 {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 13px; font-weight: 600; letter-spacing: .1em;
+        }
+        .tang_panel_head h2::before {
+            content: ""; width: 3px; height: 13px; border-radius: 2px;
+            background: linear-gradient(180deg, var(--tang_cyan), rgba(57, 224, 198, 0));
+        }
+        .tang_panel_head span { color: var(--tang_muted); font-size: 10.5px; letter-spacing: .06em; }
+        .tang_chart { flex: 1; width: 100%; min-height: 120px; }
+        .tang_col > .tang_panel { flex: 0 0 auto; }
+        .tang_col > .tang_panel_grow { flex: 1 1 0; min-height: 0; }
+        .tang_col > .tang_panel_map { flex: 1 1 0; min-height: 420px; }
+
+        /* 指标卡 */
+        .tang_kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; padding-top: 10px; }
+        .tang_kpi {
+            padding: 8px 9px; border: 1px solid var(--tang_line_soft); border-radius: 8px;
+            background: linear-gradient(180deg, rgba(45, 165, 178, .18), rgba(8, 24, 36, .35));
+        }
+        .tang_kpi i { color: var(--tang_cyan); font-size: 12px; opacity: .85; }
+        .tang_kpi b {
+            display: block; margin-top: 2px; color: #eafffb; font-size: clamp(15px, 1.35vw, 21px);
+            font-family: Consolas, "Courier New", monospace; letter-spacing: .01em;
+            text-shadow: 0 0 14px rgba(70, 220, 210, .35);
+        }
+        .tang_kpi b small { margin-left: 2px; font-size: 11px; color: var(--tang_cyan); font-family: inherit; }
+        .tang_kpi b span { display: inline; color: inherit; font-size: inherit; }
+        .tang_kpi > span { display: block; margin-top: 3px; color: var(--tang_muted); font-size: 10.5px; }
+
+        /* 地图面板 */
+        .tang_panel_map { flex: 1; min-height: 430px; }
+        .tang_tabs { display: flex; gap: 6px; }
+        .tang_tab {
+            padding: 4px 10px; border: 1px solid var(--tang_line_soft); border-radius: 999px;
+            background: rgba(10, 32, 46, .6); color: var(--tang_muted);
+            font-family: inherit; font-size: 11px; cursor: pointer; transition: all .2s ease;
+        }
+        .tang_tab:hover { color: var(--tang_text); border-color: var(--tang_line); }
+        .tang_tab.is_active {
+            color: #04121a; font-weight: 600; border-color: transparent;
+            background: linear-gradient(135deg, var(--tang_cyan), #7ee9c4);
+            box-shadow: 0 0 14px rgba(57, 224, 198, .35);
+        }
+        .tang_map_foot {
+            display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between;
+            padding-top: 7px; border-top: 1px dashed var(--tang_line_soft);
+            color: var(--tang_muted); font-size: 10.5px; letter-spacing: .04em;
+        }
+
+        /* 排行条 */
+        .tang_rank { display: flex; flex-direction: column; gap: 9px; padding-top: 11px; }
+        .tang_rank_row { display: grid; grid-template-columns: 54px 1fr 62px; align-items: center; gap: 8px; font-size: 12px; }
+        .tang_rank_name { color: var(--tang_text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tang_rank_bar { height: 8px; border-radius: 999px; background: rgba(120, 190, 200, .12); overflow: hidden; }
+        .tang_rank_bar em {
+            display: block; height: 100%; border-radius: 999px; width: 0;
+            background: linear-gradient(90deg, rgba(57, 224, 198, .55), var(--tang_cyan));
+            box-shadow: 0 0 10px rgba(57, 224, 198, .45);
+            transition: width .9s cubic-bezier(.22, .8, .3, 1);
+        }
+        .tang_rank_row:nth-child(2n) .tang_rank_bar em { background: linear-gradient(90deg, rgba(74, 168, 255, .5), #6fc7ff); }
+        .tang_rank_val { color: var(--tang_gold); font-family: Consolas, monospace; font-size: 11.5px; text-align: right; }
+
+        /* 实时动态 */
+        .tang_feed {
+            display: flex; flex-direction: column; gap: 6px; padding-top: 9px; overflow: hidden; flex: 1;
+            mask-image: linear-gradient(180deg, #000 88%, transparent);
+            -webkit-mask-image: linear-gradient(180deg, #000 88%, transparent);
+        }
+        .tang_feed_item {
+            display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 7px;
+            padding: 6px 8px; border-radius: 7px; background: rgba(24, 62, 80, .32);
+            border-left: 2px solid rgba(57, 224, 198, .55);
+            animation: tang_slide .45s ease both; font-size: 11.5px;
+        }
+        .tang_feed_item:nth-child(2n) { border-left-color: rgba(74, 168, 255, .55); }
+        .tang_feed_item i { color: var(--tang_cyan); font-size: 12px; }
+        .tang_feed_item span { color: #cfe6ef; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .tang_feed_item time { color: var(--tang_muted); font-family: Consolas, monospace; font-size: 10.5px; }
+        @keyframes tang_slide { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+        .tang_foot {
+            display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: space-between;
+            color: var(--tang_muted); font-size: 10.5px; letter-spacing: .06em; padding: 0 4px;
+        }
+        .tang_foot a { color: var(--tang_cyan); }
+        .tang_foot a:hover { text-decoration: underline; }
+
+        @media (max-width: 1180px) {
+            .tang_layout { grid-template-columns: 1fr 1fr; }
+            .tang_col_center { grid-column: 1 / -1; order: -1; }
+            .tang_col > .tang_panel_map { min-height: 56vh; }
+            .tang_col > .tang_panel_grow { min-height: 200px; }
+        }
+        @media (max-width: 760px) {
+            .tang_screen { min-height: 0; }
+            .tang_top { grid-template-columns: 1fr; text-align: center; }
+            .tang_top_right { justify-content: center; }
+            .tang_layout { display: flex; flex-direction: column; }
+            .tang_col_center { order: 0; }
+            .tang_col > .tang_panel,
+            .tang_col > .tang_panel_grow,
+            .tang_col > .tang_panel_map { flex: 0 0 auto; min-height: 0; }
+            .tang_chart { min-height: 220px; }
+            .tang_panel_map .tang_chart { min-height: 420px; }
+            .tang_kpi > span { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+<div class="tang_screen">
+    <header class="tang_top">
+        <div>
+            <span class="tang_tag"><i class="iconfont">&#xe6bb;</i>数据来源：模拟演示数据</span>
+        </div>
+        <div class="tang_title">
+            <h1>全国数字阅读数据大屏</h1>
+            <p>CHINA DIGITAL READING DASHBOARD</p>
+        </div>
+        <div class="tang_top_right">
+            <div class="tang_clock">
+                <span id="tang_time">--:--:--</span>
+                <small id="tang_date">----年--月--日</small>
+            </div>
+            <a class="tang_back" href="index.html"><i class="iconfont">&#xe64c;</i>返回首页</a>
+        </div>
+    </header>
+
+    <main class="tang_layout">
+        <!-- 左栏 -->
+        <div class="tang_col">
+            <section class="tang_panel">
+                <div class="tang_panel_head">
+                    <h2>核心指标</h2>
+                    <span>截至今日</span>
+                </div>
+                <div class="tang_kpis">
+                    <div class="tang_kpi">
+                        <i class="iconfont">&#xe751;</i>
+                        <b><span id="tang_kpi_read" data-target="2.29" data-digits="2">0.00</span><small>亿</small></b>
+                        <span>累计阅读人次</span>
+                    </div>
+                    <div class="tang_kpi">
+                        <i class="iconfont">&#xe8c3;</i>
+                        <b><span id="tang_kpi_user" data-target="24860" data-digits="0">0</span></b>
+                        <span>实时在线读者</span>
+                    </div>
+                    <div class="tang_kpi">
+                        <i class="iconfont">&#xe604;</i>
+                        <b><span id="tang_kpi_res" data-target="5742" data-digits="0">0</span><small>TB</small></b>
+                        <span>数字资源总量</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tang_panel tang_panel_grow">
+                <div class="tang_panel_head">
+                    <h2>省级阅读量 TOP8</h2>
+                    <span id="tang_rank_unit">单位：万次</span>
+                </div>
+                <div class="tang_chart" id="tang_bar"></div>
+            </section>
+
+            <section class="tang_panel tang_panel_grow">
+                <div class="tang_panel_head">
+                    <h2>24 小时活跃趋势</h2>
+                    <span>单位：万次 / 时</span>
+                </div>
+                <div class="tang_chart" id="tang_line"></div>
+            </section>
+        </div>
+
+        <!-- 中栏：中国地图 -->
+        <div class="tang_col tang_col_center">
+            <section class="tang_panel tang_panel_map">
+                <div class="tang_panel_head">
+                    <h2>全国阅读热力分布</h2>
+                    <div class="tang_tabs">
+                        <button class="tang_tab is_active" type="button" data-kind="read">阅读人次</button>
+                        <button class="tang_tab" type="button" data-kind="user">新增读者</button>
+                        <button class="tang_tab" type="button" data-kind="download">资源下载</button>
+                    </div>
+                </div>
+                <div class="tang_chart" id="tang_map" style="min-height: 340px;"></div>
+                <div class="tang_map_foot">
+                    <span>地图数据：本地 GeoJSON（阿里云 DataV.GeoAtlas 全国边界）</span>
+                    <span>支持滚轮缩放 / 拖拽平移 · 点击省份查看明细</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- 右栏 -->
+        <div class="tang_col">
+            <section class="tang_panel tang_panel_grow">
+                <div class="tang_panel_head">
+                    <h2>资源类型占比</h2>
+                    <span>占比 %</span>
+                </div>
+                <div class="tang_chart" id="tang_pie"></div>
+            </section>
+
+            <section class="tang_panel">
+                <div class="tang_panel_head">
+                    <h2>城市阅读排行</h2>
+                    <span>TOP5</span>
+                </div>
+                <div class="tang_rank" id="tang_city_rank"></div>
+            </section>
+
+            <section class="tang_panel tang_panel_grow">
+                <div class="tang_panel_head">
+                    <h2>实时动态</h2>
+                    <span>每 2.6 秒刷新</span>
+                </div>
+                <div class="tang_feed" id="tang_feed"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="tang_foot">
+        <span>唐翊斌 · 高级网页设计课堂实践 · ECharts 5.6.0 + 本地 GeoJSON</span>
+        <span>数据均为模拟演示数据 · No CDN · <a href="index.html">返回首页</a></span>
+    </footer>
+</div>
+
+<script src="cdn/echarts.min.js"></script>
+<script src="cdn/china-map.js"></script>
+<script>
+(function () {
+    "use strict";
+
+    var tang_echarts = window.echarts;
+    if (!tang_echarts) {
+        document.getElementById("tang_map").innerHTML = "<p style='padding:30px;color:#f7c86b'>ECharts 本地文件加载失败，请检查 cdn/echarts.min.js。</p>";
+        return;
+    }
+
+    /* ===================== 1. 模拟数据 ===================== */
+    var tang_base = {
+        "北京": 1286, "天津": 612, "河北": 806, "山西": 486, "内蒙古": 322,
+        "辽宁": 640, "吉林": 356, "黑龙江": 430, "上海": 1152, "江苏": 1533,
+        "浙江": 1408, "安徽": 748, "福建": 792, "江西": 596, "山东": 1210,
+        "河南": 1086, "湖北": 902, "湖南": 878, "广东": 1864, "广西": 528,
+        "海南": 246, "重庆": 588, "四川": 1042, "贵州": 452, "云南": 542,
+        "西藏": 76, "陕西": 662, "甘肃": 264, "青海": 108, "宁夏": 132,
+        "新疆": 298, "台湾": 386, "香港": 342, "澳门": 96
+    };
+    var tang_names = Object.keys(tang_base);
+
+    // 三个指标：阅读人次（万次）、新增读者（人）、资源下载（万次）
+    var tang_metrics = {
+        read: { label: "阅读人次", unit: "万次", data: {} },
+        user: { label: "新增读者", unit: "人", data: {} },
+        download: { label: "资源下载", unit: "万次", data: {} }
+    };
+    tang_names.forEach(function (name, i) {
+        var base = tang_base[name];
+        tang_metrics.read.data[name] = base;
+        tang_metrics.user.data[name] = Math.round(base * 8.6 + (i % 9) * 37);
+        tang_metrics.download.data[name] = Math.round(base * 0.42 + (i % 7) * 11);
+    });
+
+    // 24 小时活跃趋势
+    var tang_hours = [];
+    var tang_hour_data = [];
+    for (var h = 0; h < 24; h++) {
+        tang_hours.push((h < 10 ? "0" + h : h) + ":00");
+        var wave = Math.sin((h - 4) / 24 * Math.PI * 2) * 0.34 + 0.62;
+        if (h >= 9 && h <= 11) wave += 0.22;
+        if (h >= 19 && h <= 22) wave += 0.30;
+        tang_hour_data.push(Math.round(wave * 100 * 10) / 10 + (h % 3) * 2.4);
+    }
+
+    // 资源类型占比
+    var tang_pie_data = [
+        { name: "电子图书", value: 42 },
+        { name: "期刊论文", value: 23 },
+        { name: "音视频", value: 16 },
+        { name: "学位论文", value: 12 },
+        { name: "标准专利", value: 7 }
+    ];
+
+    // 城市排行
+    var tang_cities = [
+        { name: "北京", value: 1286 },
+        { name: "上海", value: 1152 },
+        { name: "广州", value: 968 },
+        { name: "深圳", value: 902 },
+        { name: "成都", value: 786 }
+    ];
+
+    var tang_text_color = "#7d9db0";
+    var tang_tooltip = {
+        backgroundColor: "rgba(6, 20, 30, .94)",
+        borderColor: "rgba(90, 214, 207, .38)",
+        borderWidth: 1,
+        padding: [8, 12],
+        textStyle: { color: "#dceaf2", fontSize: 12 },
+        extraCssText: "box-shadow: 0 8px 22px rgba(0,0,0,.5); border-radius: 6px;"
+    };
+
+    function tang_format(value, digits) {
+        var text = (digits === undefined || digits === null)
+            ? String(value)
+            : Number(value).toFixed(digits);
+        return text.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    /* ===================== 2. 地图 ===================== */
+    var tang_map_chart = tang_echarts.init(document.getElementById("tang_map"), null, { renderer: "canvas" });
+    var tang_current_kind = "read";
+
+    function tang_map_option(kind) {
+        var metric = tang_metrics[kind];
+        var data = tang_names.map(function (name) {
+            return { name: name, value: metric.data[name] };
+        });
+        var values = data.map(function (d) { return d.value; });
+        var min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
+
+        return {
+            tooltip: Object.assign({}, tang_tooltip, {
+                trigger: "item",
+                formatter: function (p) {
+                    if (p.value === undefined || p.value === null || isNaN(p.value)) {
+                        return "<b>" + p.name + "</b><br/>暂无统计数据";
+                    }
+                    return "<b>" + p.name + "</b><br/>" + metric.label + "：" +
+                        tang_format(p.value) + " " + metric.unit;
+                }
+            }),
+            visualMap: {
+                type: "continuous",
+                min: min,
+                max: max,
+                left: 12,
+                bottom: 20,
+                itemWidth: 11,
+                itemHeight: 92,
+                text: ["高", "低"],
+                calculable: true,
+                inRange: { color: ["#0a2b42", "#0f657f", "#1fb1ac", "#61ddb2", "#f7c86b"] },
+                textStyle: { color: tang_text_color, fontSize: 11 },
+                formatter: function (v) { return Math.round(v); }
+            },
+            series: [{
+                type: "map",
+                map: "china",
+                roam: true,
+                zoom: 1.08,
+                left: "4%",
+                right: "4%",
+                top: 18,
+                bottom: 6,
+                selectedMode: false,
+                label: {
+                    show: true,
+                    color: "rgba(205, 232, 244, .78)",
+                    fontSize: 9.5,
+                    textBorderColor: "rgba(4, 14, 22, .72)",
+                    textBorderWidth: 2,
+                    formatter: function (p) {
+                        var tang_hide = ["天津", "上海", "香港", "澳门", "南海诸岛"];
+                        return tang_hide.indexOf(p.name) > -1 ? "" : p.name;
+                    }
+                },
+                labelLayout: { hideOverlap: true },
+                itemStyle: {
+                    areaColor: "#0a2336",
+                    borderColor: "rgba(105, 214, 214, .42)",
+                    borderWidth: .7
+                },
+                emphasis: {
+                    label: { color: "#ffffff", fontSize: 12, fontWeight: "bold" },
+                    itemStyle: {
+                        areaColor: "#1f93a6",
+                        borderColor: "#9ef4e2",
+                        borderWidth: 1.1,
+                        shadowBlur: 18,
+                        shadowColor: "rgba(80, 230, 220, .55)"
+                    }
+                },
+                animationDuration: 800,
+                animationDurationUpdate: 700,
+                data: data
+            }]
+        };
+    }
+    tang_map_chart.setOption(tang_map_option(tang_current_kind));
+
+    // 指标切换
+    var tang_tab_nodes = document.querySelectorAll(".tang_tab");
+    Array.prototype.forEach.call(tang_tab_nodes, function (btn) {
+        btn.addEventListener("click", function () {
+            var kind = btn.getAttribute("data-kind");
+            if (kind === tang_current_kind) return;
+            tang_current_kind = kind;
+            Array.prototype.forEach.call(tang_tab_nodes, function (b) {
+                b.classList.toggle("is_active", b === btn);
+            });
+            tang_map_chart.setOption(tang_map_option(kind), true);
+            tang_bar_chart.setOption(tang_bar_option(kind), true);
+            tang_render_city_rank(kind);
+        });
+    });
+
+    /* ===================== 3. TOP8 条形图 ===================== */
+    var tang_bar_chart = tang_echarts.init(document.getElementById("tang_bar"), null, { renderer: "canvas" });
+
+    function tang_bar_option(kind) {
+        var metric = tang_metrics[kind];
+        var top = tang_names.map(function (name) {
+            return { name: name, value: metric.data[name] };
+        }).sort(function (a, b) { return b.value - a.value; }).slice(0, 8).reverse();
+
+        return {
+            grid: { left: 8, right: 46, top: 10, bottom: 6, containLabel: true },
+            tooltip: Object.assign({}, tang_tooltip, {
+                trigger: "axis",
+                axisPointer: { type: "shadow" },
+                formatter: function (items) {
+                    var it = items[0];
+                    return "<b>" + it.name + "</b><br/>" + metric.label + "：" +
+                        tang_format(it.value) + " " + metric.unit;
+                }
+            }),
+            xAxis: {
+                type: "value",
+                splitLine: { lineStyle: { color: "rgba(120, 190, 200, .12)" } },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                axisLabel: { color: tang_text_color, fontSize: 10 }
+            },
+            yAxis: {
+                type: "category",
+                data: top.map(function (d) { return d.name; }),
+                axisLine: { lineStyle: { color: "rgba(120, 190, 200, .25)" } },
+                axisTick: { show: false },
+                axisLabel: { color: "#bcd6e0", fontSize: 11 }
+            },
+            series: [{
+                type: "bar",
+                barWidth: 9,
+                itemStyle: {
+                    borderRadius: [0, 6, 6, 0],
+                    color: new tang_echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                        { offset: 0, color: "rgba(57, 224, 198, .28)" },
+                        { offset: 1, color: "#39e0c6" }
+                    ])
+                },
+                label: {
+                    show: true,
+                    position: "right",
+                    color: "#f7c86b",
+                    fontSize: 10.5,
+                    formatter: function (p) { return tang_format(p.value); }
+                },
+                data: top.map(function (d) { return d.value; })
+            }]
+        };
+    }
+    tang_bar_chart.setOption(tang_bar_option(tang_current_kind));
+
+    /* ===================== 4. 24 小时折线图 ===================== */
+    var tang_line_chart = tang_echarts.init(document.getElementById("tang_line"), null, { renderer: "canvas" });
+    tang_line_chart.setOption({
+        grid: { left: 6, right: 14, top: 14, bottom: 4, containLabel: true },
+        tooltip: Object.assign({}, tang_tooltip, { trigger: "axis" }),
+        xAxis: {
+            type: "category",
+            boundaryGap: false,
+            data: tang_hours,
+            axisLine: { lineStyle: { color: "rgba(120, 190, 200, .25)" } },
+            axisTick: { show: false },
+            axisLabel: { color: tang_text_color, fontSize: 9.5, interval: 3 }
+        },
+        yAxis: {
+            type: "value",
+            splitLine: { lineStyle: { color: "rgba(120, 190, 200, .1)" } },
+            axisLine: { show: false },
+            axisTick: { show: false },
+            axisLabel: { color: tang_text_color, fontSize: 10 }
+        },
+        series: [{
+            type: "line",
+            smooth: true,
+            symbol: "circle",
+            symbolSize: 5,
+            showSymbol: false,
+            lineStyle: { width: 2, color: "#39e0c6", shadowBlur: 12, shadowColor: "rgba(57, 224, 198, .55)" },
+            itemStyle: { color: "#f7c86b", borderColor: "#0a1c28", borderWidth: 1 },
+            areaStyle: {
+                color: new tang_echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: "rgba(57, 224, 198, .42)" },
+                    { offset: 1, color: "rgba(57, 224, 198, .02)" }
+                ])
+            },
+            data: tang_hour_data
+        }]
+    });
+
+    /* ===================== 5. 资源类型饼图 ===================== */
+    var tang_pie_chart = tang_echarts.init(document.getElementById("tang_pie"), null, { renderer: "canvas" });
+    var tang_pie_lookup = {};
+    tang_pie_data.forEach(function (d) { tang_pie_lookup[d.name] = d.value; });
+    tang_pie_chart.setOption({
+        color: ["#39e0c6", "#4aa8ff", "#f7c86b", "#8b7bf0", "#ef7f8b"],
+        tooltip: Object.assign({}, tang_tooltip, {
+            trigger: "item",
+            formatter: "{b}<br/>占比：{d}%"
+        }),
+        legend: {
+            orient: "vertical",
+            right: 4,
+            top: "middle",
+            itemWidth: 8,
+            itemHeight: 8,
+            itemGap: 11,
+            textStyle: { color: tang_text_color, fontSize: 10.5 },
+            formatter: function (name) {
+                return name + "  " + (tang_pie_lookup[name] || 0) + "%";
+            }
+        },
+        series: [{
+            type: "pie",
+            radius: ["52%", "76%"],
+            center: ["32%", "50%"],
+            roseType: "radius",
+            avoidLabelOverlap: true,
+            itemStyle: { borderColor: "rgba(5, 13, 22, .9)", borderWidth: 2 },
+            label: { show: false },
+            labelLine: { show: false },
+            emphasis: { scaleSize: 6, itemStyle: { shadowBlur: 14, shadowColor: "rgba(57, 224, 198, .4)" } },
+            data: tang_pie_data
+        }]
+    });
+
+    /* ===================== 6. 城市排行 / 实时动态 ===================== */
+    var tang_city_rank = document.getElementById("tang_city_rank");
+    function tang_render_city_rank(kind) {
+        var metric = tang_metrics[kind];
+        var max = tang_cities[0].value;
+        tang_city_rank.innerHTML = tang_cities.map(function (c) {
+            var ratio = Math.max(6, Math.round(c.value / max * 100));
+            return '<div class="tang_rank_row">' +
+                '<span class="tang_rank_name">' + c.name + '</span>' +
+                '<span class="tang_rank_bar"><em data-width="' + ratio + '%"></em></span>' +
+                '<span class="tang_rank_val">' + tang_format(c.value) + '</span>' +
+                '</div>';
+        }).join("");
+        requestAnimationFrame(function () {
+            Array.prototype.forEach.call(tang_city_rank.querySelectorAll("em"), function (bar) {
+                bar.style.width = bar.getAttribute("data-width");
+            });
+        });
+        document.getElementById("tang_rank_unit").textContent = "单位：" + metric.unit;
+    }
+    tang_render_city_rank(tang_current_kind);
+
+    var tang_feed = document.getElementById("tang_feed");
+    var tang_feed_tpl = [
+        { icon: "&#xe6bb;", text: "北京 · 国家图书馆 新增借阅《人工智能导论》" },
+        { icon: "&#xe63b;", text: "上海 · 浦东馆 音视频资源播放量 +128" },
+        { icon: "&#xe63e;", text: "广州 · 天河馆 上传数字图片资源 36 张" },
+        { icon: "&#xe751;", text: "深圳 · 南山馆 手机借阅订单 +57" },
+        { icon: "&#xe8c3;", text: "成都 · 天府馆 读者收藏《数据可视化》" },
+        { icon: "&#xe600;", text: "杭州 · 西湖馆 完成元数据编目 24 条" },
+        { icon: "&#xe6db;", text: "西安 · 长安馆 新增注册读者 19 人" }
+    ];
+    var tang_feed_index = 0;
+
+    function tang_now_text() {
+        var d = new Date();
+        var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+        return pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    }
+
+    function tang_push_feed() {
+        var item = tang_feed_tpl[tang_feed_index % tang_feed_tpl.length];
+        tang_feed_index++;
+        var node = document.createElement("div");
+        node.className = "tang_feed_item";
+        node.innerHTML = '<i class="iconfont">' + item.icon + "</i><span>" + item.text +
+            "</span><time>" + tang_now_text() + "</time>";
+        tang_feed.insertBefore(node, tang_feed.firstChild);
+        while (tang_feed.children.length > 5) {
+            tang_feed.removeChild(tang_feed.lastChild);
+        }
+    }
+    for (var f = 0; f < 4; f++) { tang_push_feed(); }
+    setInterval(tang_push_feed, 2600);
+
+    /* ===================== 7. 时钟与数字滚动 ===================== */
+    var tang_week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+    function tang_tick_clock() {
+        var d = new Date();
+        var pad = function (n) { return n < 10 ? "0" + n : "" + n; };
+        document.getElementById("tang_time").textContent =
+            pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+        document.getElementById("tang_date").textContent =
+            d.getFullYear() + "年" + (d.getMonth() + 1) + "月" + d.getDate() + "日 " + tang_week[d.getDay()];
+    }
+    tang_tick_clock();
+    setInterval(tang_tick_clock, 1000);
+
+    function tang_count_up(el) {
+        var target = parseFloat(el.getAttribute("data-target"));
+        var digits = parseInt(el.getAttribute("data-digits"), 10) || 0;
+        var start = 0;
+        var duration = 1200;
+        var start_time = 0;
+        function step(ts) {
+            if (!start_time) start_time = ts;
+            var progress = Math.min(1, (ts - start_time) / duration);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = tang_format((start + (target - start) * eased).toFixed(digits));
+            if (progress < 1) requestAnimationFrame(step);
+            else el.textContent = tang_format(target.toFixed(digits));
+        }
+        requestAnimationFrame(step);
+    }
+    ["tang_kpi_read", "tang_kpi_user", "tang_kpi_res"].forEach(function (id) {
+        tang_count_up(document.getElementById(id));
+    });
+
+    /* ===================== 8. 自适应 ===================== */
+    var tang_charts = [tang_map_chart, tang_bar_chart, tang_line_chart, tang_pie_chart];
+    function tang_resize_all() {
+        tang_charts.forEach(function (c) { c.resize(); });
+    }
+    window.addEventListener("resize", tang_resize_all);
+    if (window.ResizeObserver) {
+        var tang_ro = new ResizeObserver(function () {
+            window.requestAnimationFrame(tang_resize_all);
+        });
+        tang_ro.observe(document.querySelector(".tang_layout"));
+    }
+})();
+</script>
+</body>
+</html>
